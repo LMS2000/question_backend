@@ -1,5 +1,7 @@
 package com.lms.question.controller;
 
+import com.lms.question.annotation.AuthCheck;
+import com.lms.question.constants.UserConstant;
 import com.lms.question.entity.vo.BankAndQuestionVo;
 import com.lms.question.service.IQuestionBankService;
 import com.lms.question.service.IQuestionService;
@@ -24,12 +26,14 @@ public class QuestionBankController {
 
 
     @GetMapping("/{id}")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BankAndQuestionVo getBankAndQuestionVo(@PathVariable("id") Integer id){
         return questionBankService.getBankAndQuestion(id);
     }
 
 
     @PostMapping("/{id}")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean  setBankQuestion(@Positive(message = "id不合法") @PathVariable("id") Integer bid, @RequestParam("qids") List<Integer> qids){
         return questionBankService.addQuestionBank(bid,qids);
     }

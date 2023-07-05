@@ -112,6 +112,7 @@ public class UserController {
      * @param userPageDto
      * @return
      */
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @PostMapping("/page")
     public Page<UserVo> getUserPage( @RequestBody QueryUserPageDto userPageDto) {
         Page<UserVo> userVoPage = userService.pageUser(userPageDto);
@@ -124,6 +125,7 @@ public class UserController {
      * @param changeUserEnableDto
      * @return
      */
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @PostMapping("/change/enable")
     public Boolean changeUserEnable(@Validated @RequestBody ChangeUserEnableDto changeUserEnableDto) {
         Integer enable = changeUserEnableDto.getEnable();

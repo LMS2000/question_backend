@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lms.question.entity.dao.Bank;
 import com.lms.question.entity.dao.User;
-import com.lms.question.entity.dto.AddBankDto;
-import com.lms.question.entity.dto.QueryBankPageDto;
-import com.lms.question.entity.dto.UpdateBankDto;
+import com.lms.question.entity.dto.*;
 import com.lms.question.entity.vo.BankVo;
 
 import java.util.List;
@@ -27,4 +25,10 @@ public interface IBankService extends IService<Bank> {
     Boolean updateBank(UpdateBankDto updateBankDto);
 
     BankVo getBankById(Integer bid);
+
+
+    Boolean changePublishBank(ChangePublishStatusDto changePublishStatusDto);
+
+    Page<BankVo> pagePublishBankList(QueryPublishDto queryPublishDto);
+
 }

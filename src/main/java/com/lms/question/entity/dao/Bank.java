@@ -29,6 +29,9 @@ public class Bank {
     private String remark;
 
 
+    private  Integer publish;
+
+
     private Integer deleteFlag;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

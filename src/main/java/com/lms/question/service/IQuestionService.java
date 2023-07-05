@@ -8,7 +8,10 @@ import com.lms.question.entity.dto.AddQuestionDto;
 import com.lms.question.entity.dto.QueryQuestionDto;
 import com.lms.question.entity.dto.UpdateQuestionDto;
 import com.lms.question.entity.vo.QuestionVo;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 //题目管理
@@ -26,4 +29,11 @@ public interface IQuestionService extends IService<Question> {
     Page<QuestionVo> pageQuestionList(QueryQuestionDto queryQuestionDto);
 
     QuestionVo  getQuestionById(Integer id);
+
+
+    Boolean  importQuestions(MultipartFile file);
+
+    void exportQuestions(HttpServletResponse response);
+
+    void exportTemplates(HttpServletResponse response);
 }

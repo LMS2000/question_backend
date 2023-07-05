@@ -6,9 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lms.question.entity.dao.Bank;
 import com.lms.question.entity.dao.User;
-import com.lms.question.entity.dto.AddBankDto;
-import com.lms.question.entity.dto.QueryBankPageDto;
-import com.lms.question.entity.dto.UpdateBankDto;
+import com.lms.question.entity.dto.*;
 import com.lms.question.entity.vo.BankVo;
 import com.lms.question.entity.vo.UserVo;
 import com.lms.question.exception.BusinessException;
@@ -24,6 +22,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+import static com.lms.question.constants.BankConstant.PUBLISHED;
+import static com.lms.question.constants.BankConstant.UNPUBLISHED;
 import static com.lms.question.constants.UserConstant.DELETED;
 import static com.lms.question.constants.UserConstant.NOT_DELETED;
 import static com.lms.question.entity.factory.factory.BankFactory.BANK_CONVERTER;
@@ -83,4 +83,29 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IB
         Bank byId = this.getById(bid);
         return BANK_CONVERTER.toBankVo(byId);
     }
+
+    @Override
+    public Boolean changePublishBank(ChangePublishStatusDto changePublishStatusDto) {
+        Integer bid = changePublishStatusDto.getBid();
+        Integer status = changePublishStatusDto.getStatus();
+        return this.updateById(Bank.builder().id(bid).publish(status).build());
+    }
+
+    @Override
+    public Page<BankVo> pagePublishBankList(QueryPublishDto queryPublishDto) {
+        String name = queryPublishDto.getName();
+        Integer pageNum = queryPublishDto.getPageNum();
+        Integer pageSize = queryPublishDto.getPageSize();
+        QueryWrapper<Bank> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like(StringUtils.isNotBlank(name), "name", name)
+                .eq("delete_flag", NOT_DELETED).eq("publish",PUBLISHED);
+        Page<Bank> pageBank = this.page(new Page<>(pageNum, pageSize), queryWrapper);
+        List<Bank> records = pageBank.getRecords();
+        List<BankVo> bankVos = BANK_CONVERTER.toListBankVo(records);
+        Page<BankVo> result = new Page<>(pageNum, pageSize, pageBank.getTotal());
+        result.setRecords(bankVos);
+        return result;
+    }
+
+
 }
