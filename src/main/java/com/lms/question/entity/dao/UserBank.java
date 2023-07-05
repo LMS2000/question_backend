@@ -17,12 +17,13 @@ import java.time.LocalDateTime;
 @Builder
 public class UserBank {
 
-    @TableId(value = "uid", type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /*
       用户id
      */
+    @TableField("user_id")
     private Integer userId;
 
     /*
@@ -33,6 +34,7 @@ public class UserBank {
     /*
      所属题库
      */
+    @TableField("bank_id")
     private Integer bankId;
 
     /*
