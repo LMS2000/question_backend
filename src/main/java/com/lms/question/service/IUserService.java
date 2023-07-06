@@ -25,7 +25,13 @@ public interface IUserService extends IService<User> {
      * @param addUserDto
      * @return 新用户 id
      */
-    Integer userRegister(AddUserDto addUserDto);
+    Integer addUser(AddUserDto addUserDto);
+
+
+    Boolean registerUser(RegisterUserDto registerUserDto);
+
+
+
 
     /**
      * 用户登录

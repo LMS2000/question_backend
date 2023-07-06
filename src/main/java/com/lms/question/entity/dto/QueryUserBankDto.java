@@ -13,11 +13,14 @@ import java.io.Serializable;
 public class QueryUserBankDto extends CustomPage implements Serializable {
     private static final long serialVersionUID = 1L;
 
-   private  Integer userId;
+
+   private String username;
 
    //练习或者考试状态
    private  Integer type;
    //题库名
    private String bankName;
+
+   private Integer submit;
 
 }

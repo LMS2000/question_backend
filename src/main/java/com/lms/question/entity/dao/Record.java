@@ -36,6 +36,9 @@ public class Record {
      */
     private String userAnswer;
 
+
+    private Integer correct;
+
     /*
        用户得分
      */

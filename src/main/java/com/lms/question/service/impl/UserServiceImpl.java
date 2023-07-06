@@ -45,7 +45,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
 
     @Override
-    public Integer userRegister(AddUserDto addUserDto) {
+    public Integer addUser(AddUserDto addUserDto) {
 
         String username = addUserDto.getUsername();
         //校验重复的用户名
@@ -60,6 +60,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setPassword(encryptPassword);
         this.save(user);
         return user.getUid();
+    }
+
+    @Override
+    public Boolean registerUser(RegisterUserDto registerUserDto) {
+
+        String username = registerUserDto.getUsername();
+        //校验重复的用户名
+        BusinessException.throwIf(this.count(new QueryWrapper<User>().eq("username",username))>0,HttpCode.PARAMS_ERROR,"用户名重复");
+
+        String password = registerUserDto.getPassword();
+
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+
+        User user=new User();
+        BeanUtils.copyProperties(registerUserDto,user);
+        user.setUserRole(DEFAULT_ROLE);
+        user.setNickname("user");
+        user.setPassword(encryptPassword);
+       return   this.save(user);
     }
 
     @Override

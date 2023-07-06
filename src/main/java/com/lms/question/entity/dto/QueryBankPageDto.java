@@ -1,21 +1,17 @@
 package com.lms.question.entity.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.lms.page.CustomPage;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
 @Slf4j
-public class QueryBankPageDto implements Serializable {
+public class QueryBankPageDto extends CustomPage implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer pageNum;
-    private Integer pageSize;
     private String name;
 }

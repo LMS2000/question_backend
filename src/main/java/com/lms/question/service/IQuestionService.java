@@ -25,15 +25,20 @@ public interface IQuestionService extends IService<Question> {
 
     Boolean removeQuestion(List<Integer> qids);
 
-
+   /*
+    条件分页查询
+    */
     Page<QuestionVo> pageQuestionList(QueryQuestionDto queryQuestionDto);
 
+    // 按照id获取题目
     QuestionVo  getQuestionById(Integer id);
 
-
+   //导入题目
     Boolean  importQuestions(MultipartFile file);
 
+    //导出题目
     void exportQuestions(HttpServletResponse response);
 
+    //导出题目模板
     void exportTemplates(HttpServletResponse response);
 }

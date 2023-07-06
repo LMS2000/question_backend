@@ -26,9 +26,9 @@ public interface IBankService extends IService<Bank> {
 
     BankVo getBankById(Integer bid);
 
-
+    //发布或者下架题库
     Boolean changePublishBank(ChangePublishStatusDto changePublishStatusDto);
-
+    //获取发布后的题库
     Page<BankVo> pagePublishBankList(QueryPublishDto queryPublishDto);
 
 }

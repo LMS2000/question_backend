@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lms.question.entity.dao.Question;
 import com.lms.question.entity.dao.QuestionBank;
 
+import com.lms.question.entity.dto.QueryBankAndQuestionDto;
 import com.lms.question.entity.vo.BankAndQuestionVo;
 import com.lms.question.entity.vo.BankVo;
 import com.lms.question.entity.vo.QuestionVo;
@@ -16,6 +17,8 @@ import com.lms.question.service.IBankService;
 import com.lms.question.service.IQuestionBankService;
 import com.lms.question.service.IQuestionService;
 import com.lms.question.utis.MybatisUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,14 +40,21 @@ public class QuestionBankImpl extends ServiceImpl<QuestionBankMapper, QuestionBa
     private IQuestionService questionService;
 
     @Override
-    public BankAndQuestionVo getBankAndQuestion(Integer bid) {
+    public BankAndQuestionVo getBankAndQuestion(Integer bid, QueryBankAndQuestionDto queryBankAndQuestionDto) {
+
+
+
         BankVo bankVo = bankService.getBankById(bid);
         BusinessException.throwIf(bankVo == null);
         List<Integer> bids = this.list(new QueryWrapper<QuestionBank>().eq("bid", bid)).stream()
                 .map(QuestionBank::getQid).collect(Collectors.toList());
 
         bankVo.setQids(bids);
-        List<Question> questionList = questionService.list(null);
+        Integer type = queryBankAndQuestionDto.getType();
+        String questionStem = queryBankAndQuestionDto.getQuestionStem();
+        List<Question> questionList = questionService.list(new QueryWrapper<Question>()
+                .eq(ObjectUtils.isNotEmpty(type),"type",type)
+                .like(StringUtils.isNotBlank(questionStem),"question_stem",questionStem));
         List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
 
 
@@ -96,5 +106,10 @@ public class QuestionBankImpl extends ServiceImpl<QuestionBankMapper, QuestionBa
         }
         return true;
 
+    }
+
+    private boolean validType(Integer type) {
+        List<Integer> types = List.of(0, 1, 2, 3, 4);
+        return ObjectUtils.isNotEmpty(type) && types.contains(type);
     }
 }

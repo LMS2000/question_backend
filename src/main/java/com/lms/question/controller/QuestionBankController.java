@@ -2,6 +2,7 @@ package com.lms.question.controller;
 
 import com.lms.question.annotation.AuthCheck;
 import com.lms.question.constants.UserConstant;
+import com.lms.question.entity.dto.QueryBankAndQuestionDto;
 import com.lms.question.entity.vo.BankAndQuestionVo;
 import com.lms.question.service.IQuestionBankService;
 import com.lms.question.service.IQuestionService;
@@ -25,10 +26,10 @@ public class QuestionBankController {
 
 
 
-    @GetMapping("/{id}")
+    @PostMapping("/get/{id}")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BankAndQuestionVo getBankAndQuestionVo(@PathVariable("id") Integer id){
-        return questionBankService.getBankAndQuestion(id);
+    public BankAndQuestionVo getBankAndQuestionVo(@PathVariable("id") Integer id, @RequestBody QueryBankAndQuestionDto queryBankAndQuestionDto){
+        return questionBankService.getBankAndQuestion(id,queryBankAndQuestionDto);
     }
 
 

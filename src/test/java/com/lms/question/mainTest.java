@@ -15,8 +15,8 @@ public class mainTest {
     private IUserService userService;
     @Test
     public void test2(){
-        System.out.println(userService.userRegister(AddUserDto.builder()
-                .userRole("admin").password("12345678").username("root").build()));
+//        System.out.println(userService.userRegister(AddUserDto.builder()
+//                .userRole("admin").password("12345678").username("root").build()));
 
     }
 

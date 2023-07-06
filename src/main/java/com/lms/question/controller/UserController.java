@@ -42,6 +42,11 @@ public class UserController {
         return loginUserVo;
     }
 
+
+    public Boolean  userRegister(@Validated @RequestBody RegisterUserDto registerUserDto){
+        return userService.registerUser(registerUserDto);
+    }
+
     /**
      * 注销
      * @param request
@@ -76,9 +81,9 @@ public class UserController {
      * @param userDto
      * @return
      */
-    @PostMapping("/register")
+    @PostMapping("/add")
     public Integer add(@Validated @RequestBody(required = true) AddUserDto userDto) {
-        return userService.userRegister(userDto);
+        return userService.addUser(userDto);
     }
 
     /**

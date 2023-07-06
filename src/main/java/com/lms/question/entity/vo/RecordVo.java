@@ -1,9 +1,7 @@
 package com.lms.question.entity.vo;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,40 +17,37 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @Slf4j
-public class UserBankVo implements Serializable {
+public class RecordVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
+
     private Integer id;
-
     /*
-      用户id
+       用户题库id（用户刷一套题）
      */
+    private Integer userBankId;
 
-    private Integer userId;
 
-    private UserVo user;
 
     /*
-      练习类型，练习还是考试， 练习 0   考试 1
+     题目id
      */
-    private Integer type;
+    private Integer questionId;
+
+    private QuestionVo questionVo;
+
 
     /*
-     所属题库
+       用户答案
      */
+    private String userAnswer;
 
-    private Integer bankId;
 
-
-    private BankVo bank;
-    /*
-      是否提交
-     */
-    private Integer submit;
+    private Integer correct;
 
     /*
-     总分数
+       用户得分
      */
     private Float score;
 
