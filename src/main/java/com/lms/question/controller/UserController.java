@@ -43,6 +43,7 @@ public class UserController {
     }
 
 
+    @PostMapping("/register")
     public Boolean  userRegister(@Validated @RequestBody RegisterUserDto registerUserDto){
         return userService.registerUser(registerUserDto);
     }
