@@ -3,11 +3,9 @@ package com.lms.question.utis;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.lms.question.constants.RecordHeaderConstant;
-import com.lms.question.entity.dao.Record;
 import com.lms.question.entity.vo.RecordVo;
 import com.lms.question.exception.BusinessException;
 import com.lms.redis.RedisCache;
-import org.springframework.data.redis.core.convert.Bucket;
 
 import java.util.List;
 

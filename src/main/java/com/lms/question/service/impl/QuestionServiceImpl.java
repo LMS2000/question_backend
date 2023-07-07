@@ -26,6 +26,7 @@ import com.lms.question.exception.BusinessException;
 import com.lms.question.listener.QuestionListener;
 import com.lms.question.mapper.QuestionMapper;
 import com.lms.question.mapper.UserMapper;
+import com.lms.question.service.IQuestionBankService;
 import com.lms.question.service.IQuestionService;
 import com.lms.question.service.IUserService;
 import com.lms.question.utis.MybatisUtils;
@@ -54,6 +55,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
     @Resource
     private QuestionListener listener;
+
+
+    @Resource
+    private IQuestionBankService questionBankService;
 
     /**
      * 添加题目
@@ -91,10 +96,10 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
      */
     @Override
     public Boolean removeQuestion(List<Integer> qids) {
-
         BusinessException.throwIfNot(MybatisUtils.checkQids(qids));
+        this.removeBatchByIds(qids);
+        return questionBankService.remove(new QueryWrapper<QuestionBank>().in("qid", qids));
 
-        return this.removeBatchByIds(qids);
     }
 
 
@@ -151,11 +156,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
 
-        try{
+        try {
             //导出的文件名
-            String filename = URLEncoder.encode("题目集","utf-8");
+            String filename = URLEncoder.encode("题目集", "utf-8");
             //设置响应头
-            response.setHeader("Content-Disposition","attachment;filename="+filename+".xlsx");
+            response.setHeader("Content-Disposition", "attachment;filename=" + filename + ".xlsx");
             //获得流对象
             ServletOutputStream outputStream = response.getOutputStream();
             //获得write对象
@@ -167,8 +172,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(list);
             //生成表格文件
             sheet.doWrite(questionVos);
-        }catch (Exception e){
-            throw new BusinessException(HttpCode.OPERATION_ERROR,"导出失败");
+        } catch (Exception e) {
+            throw new BusinessException(HttpCode.OPERATION_ERROR, "导出失败");
         }
 
     }
@@ -179,11 +184,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         response.setContentType("application/vnd.ms-excel");
         response.setCharacterEncoding("utf-8");
 
-        try{
+        try {
             //导出的文件名
-            String filename = URLEncoder.encode("题目集模板","utf-8");
+            String filename = URLEncoder.encode("题目集模板", "utf-8");
             //设置响应头
-            response.setHeader("Content-Disposition","attachment;filename="+filename+".xlsx");
+            response.setHeader("Content-Disposition", "attachment;filename=" + filename + ".xlsx");
             //获得流对象
             ServletOutputStream outputStream = response.getOutputStream();
             //获得write对象
@@ -195,8 +200,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(list);
             //生成表格文件
             sheet.doWrite(questionVos);
-        }catch (Exception e){
-            throw new BusinessException(HttpCode.OPERATION_ERROR,"导出失败");
+        } catch (Exception e) {
+            throw new BusinessException(HttpCode.OPERATION_ERROR, "导出失败");
         }
     }
 

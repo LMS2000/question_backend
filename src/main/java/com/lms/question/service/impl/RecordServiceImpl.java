@@ -183,11 +183,20 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     }
 
 
+    /**
+     * 思路：
+     *  首先获取目标题目的题库列表，然后进入策略模式填充每一个Record的分数，并且返回该题目的得分
+     *
+     * @param saveUserRecordDto
+     * @return
+     */
     @Override
     public Boolean calculateScore(SaveUserRecordDto saveUserRecordDto) {
 
-       return null;
+        List<RecordVo> recordVoList = saveUserRecordDto.getRecordVoList();
 
+
+        return null;
     }
 
     private boolean validCorrect(Integer value) {

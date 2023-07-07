@@ -94,6 +94,13 @@ public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> i
         return userBankVoPage;
     }
 
+    /**
+     * 获取用户未提交的最近的练习记录
+     * @param bid
+     * @param type
+     * @param request
+     * @return
+     */
     @Override
     public UserBankVo getUserNotRecentlySubmitted(Integer bid,Integer type, HttpServletRequest request) {
 

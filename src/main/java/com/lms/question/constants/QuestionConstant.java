@@ -26,4 +26,13 @@ public interface QuestionConstant {
     主观
      */
     Integer SUBJECTIVE=4;
+
+    //选项分割
+    String OPTIONS_SUFFIX=";";
+
+    //题目正确
+    Integer  CORRECT=1;
+    //题目错误
+    Integer UNCORRECT=0;
+
 }
