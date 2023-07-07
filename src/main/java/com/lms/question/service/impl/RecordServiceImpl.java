@@ -137,7 +137,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     public GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request) {
 
         //查找用户的最近没提交练习记录
-        UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
+//        UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
         List<Integer> qids= questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", id)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
         List<Question> questionList=null;
         //如果是考试状态没有答案
@@ -150,10 +150,9 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
                             "options", "question_score","answer","explanation"));
         }
         List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
-        List<Record> records = this.list(new QueryWrapper<Record>().eq("user_bank_id", userNotRecentlySubmitted.getId()));
+//        List<Record> records = this.list(new QueryWrapper<Record>().eq("user_bank_id", userNotRecentlySubmitted.getId()));
 
-        return GetQuestionsAndRecordVo.builder().questionVoList(questionVos)
-                .recordVoList(RECORD_CONVERTER.toListRecordVo(records)).build();
+        return GetQuestionsAndRecordVo.builder().questionVoList(questionVos).type(type).build();
     }
 
     private boolean validCorrect(Integer value){

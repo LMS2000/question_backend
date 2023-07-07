@@ -62,5 +62,12 @@ public class RecordController {
         return recordService.getQuestionsByMode(id,type,request);
     }
 
+//    //临时保存用户记录
+//
+//    //
+//    public Boolean saveTempUserBankRecord(){
+//
+//    }
+
 
 }

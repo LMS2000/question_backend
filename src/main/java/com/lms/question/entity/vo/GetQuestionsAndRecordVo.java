@@ -20,7 +20,7 @@ public class GetQuestionsAndRecordVo implements Serializable {
 
     private List<QuestionVo>   questionVoList;
 
-    private List<RecordVo>   recordVoList;
+//    private List<RecordVo>   recordVoList;
     //练习0  考试1
     private Integer type;
 
