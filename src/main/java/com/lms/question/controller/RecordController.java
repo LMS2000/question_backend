@@ -75,7 +75,7 @@ public class RecordController {
      * @return
      */
     @PostMapping("/save/temp")
-    public Boolean saveTempUserBankRecord(@Validated @RequestBody SaveUserRecordDto saveUserRecordDto){
+    public Boolean saveTempUserBankRecord( @RequestBody SaveUserRecordDto saveUserRecordDto){
          return recordService.saveTempUserRecord(saveUserRecordDto);
     }
 
@@ -87,6 +87,9 @@ public class RecordController {
     public Boolean submitPaper(@RequestBody SaveUserRecordDto saveUserRecordDto){
          return recordService.calculateScore(saveUserRecordDto);
     }
+
+     //根据ubid获取题目 如果说命中缓冲有临时答题记录就
+
 
 
 }

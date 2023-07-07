@@ -184,9 +184,9 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     public Boolean saveTempUserRecord(SaveUserRecordDto saveTempUserRecordDto) {
 
         List<RecordVo> recordVoList = saveTempUserRecordDto.getRecordVoList();
-        Integer ubid = saveTempUserRecordDto.getUbid();
+        Integer userBankId = recordVoList.get(0).getUserBankId();
         //缓冲
-        CacheUtils.setTempRecord(ubid ,recordVoList);
+        CacheUtils.setTempRecord(userBankId ,recordVoList);
         return true;
     }
 
@@ -203,7 +203,8 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     public Boolean calculateScore(SaveUserRecordDto saveUserRecordDto) {
 
         List<RecordVo> recordVoList = saveUserRecordDto.getRecordVoList();
-        UserBank userBank = userBankService.getById(saveUserRecordDto.getUbid());
+        Integer userBankId = recordVoList.get(0).getUserBankId();
+        UserBank userBank = userBankService.getById(userBankId);
         BusinessException.throwIf(userBank==null);
         Integer bankId = userBank.getBankId();
         List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", bankId)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
@@ -231,7 +232,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
         List<Record> records = RECORD_CONVERTER.toListRecord(recordVoList);
         //删除缓冲
-        CacheUtils.removeTempRecord(saveUserRecordDto.getUbid());
+        CacheUtils.removeTempRecord(userBankId);
         //保存记录
         return this.saveBatch(records);
     }

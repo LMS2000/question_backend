@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/userBank")
@@ -31,7 +32,19 @@ public class UserBankController {
         return userBankService.pageUserBank(queryUserBankDto);
     }
 
-    //暂时保存用户练习记录
+    /**
+     * 获取当前用户的条件分页练习记录
+     * @param queryUserBankDto
+     * @param request
+     * @return
+     */
+    @PostMapping("/page/user")
+    public Page<UserBankVo> getCurrentUserBanks(@RequestBody QueryUserBankDto queryUserBankDto, HttpServletRequest request){
+        return userBankService.getCurrentUserBanks(queryUserBankDto,request);
+    }
+
+
+
 
 
 

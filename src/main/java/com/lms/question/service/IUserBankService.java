@@ -19,4 +19,7 @@ public interface IUserBankService extends IService<UserBank> {
 
     //获取用户最近未提交的练习记录
     UserBankVo getUserNotRecentlySubmitted(Integer bid,Integer type, HttpServletRequest request);
+
+    //查看用户的练习记录
+    Page<UserBankVo> getCurrentUserBanks(QueryUserBankDto queryUserBankDto, HttpServletRequest request);
 }

@@ -113,6 +113,35 @@ public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> i
         return USER_BANK_CONVERTER.toUserBankVo(list.get(0));
     }
 
+    @Override
+    public Page<UserBankVo> getCurrentUserBanks(QueryUserBankDto queryUserBankDto,HttpServletRequest request) {
+        Integer type = queryUserBankDto.getType();
+        Integer pageSize = queryUserBankDto.getPageSize();
+        Integer pageNum = queryUserBankDto.getPageNum();
+        Integer submit = queryUserBankDto.getSubmit();
+        //先获取两个列表map
+        //
+        Integer uid = userService.getLoginUser(request).getUid();
+        Map<Integer, Bank> bankMap = bankService.list(null).stream()
+                .collect(Collectors.toMap(Bank::getId, Function.identity()));
+
+        Page<UserBank> page = this.page(new Page<>(pageNum, pageSize), new QueryWrapper<UserBank>()
+                .eq( "user_id", uid)
+                .eq(validType(type), "type", type)
+                .eq(validType(submit), "submit", submit));
+
+        List<UserBank> records = page.getRecords();
+        Page<UserBankVo> userBankVoPage = new Page<>(pageNum, pageSize, page.getTotal());
+        List<UserBankVo> userBankVos = USER_BANK_CONVERTER.toListUserBankVo(records);
+        userBankVos.forEach(userBankVo -> {
+            Integer bankId = userBankVo.getBankId();
+            userBankVo.setBank(BANK_CONVERTER.toBankVo(bankMap.getOrDefault(bankId, null)));
+        });
+        userBankVoPage.setRecords(userBankVos);
+        return userBankVoPage;
+
+    }
+
 
     private boolean validType(Integer type) {
         return ObjectUtils.isNotEmpty(type) && (type.equals(SUBMITTED) || type.equals(NOT_SUBMMITTED));

@@ -21,12 +21,8 @@ import java.util.List;
 public class SaveUserRecordDto implements Serializable {
     private static final long serialVersionUID = 1L;
 
-
     @NotNull(message = "用户练习记录不能为空")
     private List<RecordVo> recordVoList;
 
-    @NotNull(message = "练习记录id不能为空")
-    @Positive(message = "id不合法")
-    private Integer ubid;
 
 }
