@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -39,7 +40,8 @@ public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> i
 
 
     @Resource
-    private  IBankService bankService;
+    private IBankService bankService;
+
     @Override
     public Page<UserBankVo> pageUserBank(QueryUserBankDto queryUserBankDto) {
         String bankName = queryUserBankDto.getBankName();
@@ -60,15 +62,15 @@ public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> i
                 .collect(Collectors.toMap(Bank::getId, Function.identity()));
 
 
-        List<Integer> bids=null;
-        if(StringUtils.isNotBlank(bankName)){
+        List<Integer> bids = null;
+        if (StringUtils.isNotBlank(bankName)) {
             // 查找bid
             bids = bankService.list(new QueryWrapper<Bank>()
                     .like("name", bankName)).stream().map(Bank::getId).collect(Collectors.toList());
 
         }
-        List<Integer> uids =null;
-        if(StringUtils.isNotBlank(username)){
+        List<Integer> uids = null;
+        if (StringUtils.isNotBlank(username)) {
             uids = userService.list(new QueryWrapper<User>()
                     .like("username", username)).stream().map(User::getUid).collect(Collectors.toList());
         }
@@ -77,23 +79,33 @@ public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> i
                 .in(ObjectUtils.isNotEmpty(uids), "user_id", uids)
                 .in(ObjectUtils.isNotEmpty(bids), "bank_id", bids)
                 .eq(validType(type), "type", type)
-                .eq(validType(submit),"submit",submit));
+                .eq(validType(submit), "submit", submit));
 
         List<UserBank> records = page.getRecords();
-        Page<UserBankVo> userBankVoPage=new Page<>(pageNum,pageSize,page.getTotal());
+        Page<UserBankVo> userBankVoPage = new Page<>(pageNum, pageSize, page.getTotal());
         List<UserBankVo> userBankVos = USER_BANK_CONVERTER.toListUserBankVo(records);
         userBankVos.forEach(userBankVo -> {
             Integer userId = userBankVo.getUserId();
             Integer bankId = userBankVo.getBankId();
-             userBankVo.setUser(USER_CONVERTER.toUserVo(userMap.getOrDefault(userId, null)));
-             userBankVo.setBank(BANK_CONVERTER.toBankVo(bankMap.getOrDefault(bankId,null)));
+            userBankVo.setUser(USER_CONVERTER.toUserVo(userMap.getOrDefault(userId, null)));
+            userBankVo.setBank(BANK_CONVERTER.toBankVo(bankMap.getOrDefault(bankId, null)));
         });
-        userBankVoPage.setRecords(userBankVos );
+        userBankVoPage.setRecords(userBankVos);
         return userBankVoPage;
     }
 
+    @Override
+    public UserBankVo getUserNotRecentlySubmitted(Integer bid,Integer type, HttpServletRequest request) {
 
-    private boolean validType(Integer type){
-        return ObjectUtils.isNotEmpty(type)&&(type.equals(SUBMITTED)||type.equals(NOT_SUBMMITTED));
+        Integer uid = userService.getLoginUser(request).getUid();
+        List<UserBank> list = this.list(new QueryWrapper<UserBank>().eq("bank_id", bid)
+                .eq("user_id", uid).eq("type",type).eq("submit", NOT_SUBMMITTED).orderByDesc("update_time")
+                .last(String.format("LIMIT %d", 1)));
+        return USER_BANK_CONVERTER.toUserBankVo(list.get(0));
+    }
+
+
+    private boolean validType(Integer type) {
+        return ObjectUtils.isNotEmpty(type) && (type.equals(SUBMITTED) || type.equals(NOT_SUBMMITTED));
     }
 }

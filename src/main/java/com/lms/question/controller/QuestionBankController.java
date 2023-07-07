@@ -4,6 +4,7 @@ import com.lms.question.annotation.AuthCheck;
 import com.lms.question.constants.UserConstant;
 import com.lms.question.entity.dto.QueryBankAndQuestionDto;
 import com.lms.question.entity.vo.BankAndQuestionVo;
+import com.lms.question.entity.vo.QuestionVo;
 import com.lms.question.service.IQuestionBankService;
 import com.lms.question.service.IQuestionService;
 import com.lms.result.EnableResponseAdvice;
@@ -24,8 +25,12 @@ public class QuestionBankController {
     private IQuestionBankService questionBankService;
 
 
-
-
+    /**
+     * 获取赋予题库所需要的题目列表
+     * @param id
+     * @param queryBankAndQuestionDto
+     * @return
+     */
     @PostMapping("/get/{id}")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BankAndQuestionVo getBankAndQuestionVo(@PathVariable("id") Integer id, @RequestBody QueryBankAndQuestionDto queryBankAndQuestionDto){
@@ -33,9 +38,25 @@ public class QuestionBankController {
     }
 
 
+    /**
+     * 设置题库题目
+     * @param bid
+     * @param qids
+     * @return
+     */
     @PostMapping("/{id}")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean  setBankQuestion(@Positive(message = "id不合法") @PathVariable("id") Integer bid, @RequestParam("qids") List<Integer> qids){
         return questionBankService.addQuestionBank(bid,qids);
     }
+
+
+
+
+
+
+
+
+
+
 }

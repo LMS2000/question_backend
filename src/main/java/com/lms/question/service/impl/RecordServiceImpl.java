@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lms.question.constants.BankConstant;
 import com.lms.question.entity.dao.*;
 import com.lms.question.entity.dto.QueryRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +48,9 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
     @Resource
     private IUserService userService;
+
+    @Resource
+    private IQuestionBankService questionBankService;
 
     @Override
     public UserBankRecordVo getRecordByUserBankId(Integer ubid, QueryRecordDto queryRecordDto) {
@@ -116,6 +121,39 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         BusinessException.throwIf(question==null);
         BusinessException.throwIf(score>question.getQuestionScore());
         return this.update(new UpdateWrapper<Record>().set("score",score).eq("id",recordId));
+    }
+
+
+    /**
+     * 根据接收到的题库id和练习模式，有两个情况：
+     * 1. 根据用户id和题库id 搜索到了user_bank表中存在用户最近练习这个题库并且未提交的记录，
+     * 就需要设置用户的练习记录列表 user_bank
+     *
+     * @param id
+     * @param type
+     * @return
+     */
+    @Override
+    public GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request) {
+
+        //查找用户的最近没提交练习记录
+        UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
+        List<Integer> qids= questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", id)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
+        List<Question> questionList=null;
+        //如果是考试状态没有答案
+        if(type.equals(BankConstant.EXAMINATION_STATE)){
+            questionList = questionService.list(new QueryWrapper<Question>().in("id", qids)
+                    .select("id", "question_stem", "type", "options", "question_score"));
+        }else{
+            questionList = questionService.list(new QueryWrapper<Question>().in("id", qids)
+                    .select("id", "question_stem", "type",
+                            "options", "question_score","answer","explanation"));
+        }
+        List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
+        List<Record> records = this.list(new QueryWrapper<Record>().eq("user_bank_id", userNotRecentlySubmitted.getId()));
+
+        return GetQuestionsAndRecordVo.builder().questionVoList(questionVos)
+                .recordVoList(RECORD_CONVERTER.toListRecordVo(records)).build();
     }
 
     private boolean validCorrect(Integer value){

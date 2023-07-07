@@ -6,7 +6,9 @@ import com.lms.question.entity.dao.Bank;
 import com.lms.question.entity.dao.User;
 import com.lms.question.entity.dto.*;
 import com.lms.question.entity.vo.BankVo;
+import com.lms.question.entity.vo.PublishBankVo;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 //题库管理
@@ -29,6 +31,7 @@ public interface IBankService extends IService<Bank> {
     //发布或者下架题库
     Boolean changePublishBank(ChangePublishStatusDto changePublishStatusDto);
     //获取发布后的题库
-    Page<BankVo> pagePublishBankList(QueryPublishDto queryPublishDto);
+
+    PublishBankVo pagePublishBankList(QueryPublishDto queryPublishDto, HttpServletRequest request);
 
 }

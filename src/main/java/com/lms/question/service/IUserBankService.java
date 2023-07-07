@@ -7,6 +7,8 @@ import com.lms.question.entity.dao.UserBank;
 import com.lms.question.entity.dto.QueryUserBankDto;
 import com.lms.question.entity.vo.UserBankVo;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface IUserBankService extends IService<UserBank> {
 
 
@@ -15,4 +17,6 @@ public interface IUserBankService extends IService<UserBank> {
     Page<UserBankVo> pageUserBank(QueryUserBankDto queryUserBankDto);
 
 
+    //获取用户最近未提交的练习记录
+    UserBankVo getUserNotRecentlySubmitted(Integer bid,Integer type, HttpServletRequest request);
 }

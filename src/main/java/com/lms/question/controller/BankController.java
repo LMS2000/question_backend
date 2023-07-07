@@ -6,12 +6,14 @@ import com.lms.question.annotation.AuthCheck;
 import com.lms.question.constants.UserConstant;
 import com.lms.question.entity.dto.*;
 import com.lms.question.entity.vo.BankVo;
+import com.lms.question.entity.vo.PublishBankVo;
 import com.lms.question.service.IBankService;
 import com.lms.result.EnableResponseAdvice;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.lms.question.constants.BankConstant.PUBLISHED;
@@ -72,13 +74,29 @@ public class BankController {
         return bankService.getBankById(id);
     }
 
+
+    /**
+     * 改变发布状态
+     * @param changePublishStatusDto
+     * @return
+     */
     @PostMapping("/change/publish")
     public Boolean changePublish(@Validated @RequestBody ChangePublishStatusDto changePublishStatusDto){
        return bankService.changePublishBank(changePublishStatusDto);
     }
 
+    /**
+     * 获取发布的题库,如果当前的用户已经有在练习的题库，则应该显示继续学习
+     * @param queryPublishDto
+     * @return
+     */
     @PostMapping("/page/publish")
-    public Page<BankVo> pagePublishBankList(@RequestBody QueryPublishDto queryPublishDto){
-        return bankService.pagePublishBankList(queryPublishDto);
+    public PublishBankVo pagePublishBankList(@RequestBody QueryPublishDto queryPublishDto, HttpServletRequest request){
+        return bankService.pagePublishBankList(queryPublishDto,request);
     }
+
+
+
+
+
 }

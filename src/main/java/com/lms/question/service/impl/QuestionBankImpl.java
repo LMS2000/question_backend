@@ -3,25 +3,24 @@ package com.lms.question.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import com.lms.question.constants.BankConstant;
+import com.lms.question.constants.QuestionConstant;
 import com.lms.question.entity.dao.Question;
 import com.lms.question.entity.dao.QuestionBank;
 
 import com.lms.question.entity.dto.QueryBankAndQuestionDto;
-import com.lms.question.entity.vo.BankAndQuestionVo;
-import com.lms.question.entity.vo.BankVo;
-import com.lms.question.entity.vo.QuestionVo;
+import com.lms.question.entity.vo.*;
 import com.lms.question.exception.BusinessException;
 import com.lms.question.mapper.QuestionBankMapper;
 
-import com.lms.question.service.IBankService;
-import com.lms.question.service.IQuestionBankService;
-import com.lms.question.service.IQuestionService;
+import com.lms.question.service.*;
 import com.lms.question.utis.MybatisUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +38,16 @@ public class QuestionBankImpl extends ServiceImpl<QuestionBankMapper, QuestionBa
     @Resource
     private IQuestionService questionService;
 
+
+    @Resource
+    private IUserBankService userBankService;
+
+    /**
+     * 获取题库已有的题目id和全部的题目列表
+     * @param bid
+     * @param queryBankAndQuestionDto
+     * @return
+     */
     @Override
     public BankAndQuestionVo getBankAndQuestion(Integer bid, QueryBankAndQuestionDto queryBankAndQuestionDto) {
 
@@ -61,6 +70,12 @@ public class QuestionBankImpl extends ServiceImpl<QuestionBankMapper, QuestionBa
         return BankAndQuestionVo.builder().questionVoList(questionVos).bankVo(bankVo).build();
     }
 
+    /**
+     * 添加题库没有的题目，如果去除题目就删除
+     * @param bid
+     * @param qids
+     * @return
+     */
     @Override
     public Boolean addQuestionBank(Integer bid, List<Integer> qids) {
 
@@ -107,6 +122,11 @@ public class QuestionBankImpl extends ServiceImpl<QuestionBankMapper, QuestionBa
         return true;
 
     }
+
+
+
+
+
 
     private boolean validType(Integer type) {
         List<Integer> types = List.of(0, 1, 2, 3, 4);

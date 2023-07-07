@@ -6,24 +6,31 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lms.question.entity.dao.Bank;
 import com.lms.question.entity.dao.User;
+import com.lms.question.entity.dao.UserBank;
 import com.lms.question.entity.dto.*;
 import com.lms.question.entity.vo.BankVo;
+import com.lms.question.entity.vo.LoginUserVo;
+import com.lms.question.entity.vo.PublishBankVo;
 import com.lms.question.entity.vo.UserVo;
 import com.lms.question.exception.BusinessException;
 import com.lms.question.mapper.BankMapper;
 import com.lms.question.mapper.UserMapper;
 import com.lms.question.service.IBankService;
+import com.lms.question.service.IUserBankService;
 import com.lms.question.service.IUserService;
 import com.lms.question.utis.MybatisUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.lms.question.constants.BankConstant.PUBLISHED;
-import static com.lms.question.constants.BankConstant.UNPUBLISHED;
+import static com.lms.question.constants.BankConstant.*;
 import static com.lms.question.constants.UserConstant.DELETED;
 import static com.lms.question.constants.UserConstant.NOT_DELETED;
 import static com.lms.question.entity.factory.factory.BankFactory.BANK_CONVERTER;
@@ -32,6 +39,13 @@ import static com.lms.question.entity.factory.factory.BankFactory.BANK_CONVERTER
 @Service
 public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IBankService {
 
+
+    @Resource
+    private IUserService userService;
+
+
+    @Resource
+    private IUserBankService userBankService;
     @Override
     public Boolean addBank(AddBankDto addBankDto) {
         String name = addBankDto.getName();
@@ -92,7 +106,11 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IB
     }
 
     @Override
-    public Page<BankVo> pagePublishBankList(QueryPublishDto queryPublishDto) {
+    public PublishBankVo pagePublishBankList(QueryPublishDto queryPublishDto, HttpServletRequest request) {
+        LoginUserVo loginUser = userService.getLoginUser(request);
+        List<Integer> bids = userBankService.list(new QueryWrapper<UserBank>()
+                .eq("user_id", loginUser.getUid()).eq("submit",NOT_SUBMMITTED)).stream().map(UserBank::getBankId).collect(Collectors.toList());
+
         String name = queryPublishDto.getName();
         Integer pageNum = queryPublishDto.getPageNum();
         Integer pageSize = queryPublishDto.getPageSize();
@@ -104,7 +122,7 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IB
         List<BankVo> bankVos = BANK_CONVERTER.toListBankVo(records);
         Page<BankVo> result = new Page<>(pageNum, pageSize, pageBank.getTotal());
         result.setRecords(bankVos);
-        return result;
+        return PublishBankVo.builder().userBankIds(bids).bankVoPage(result).build();
     }
 
 

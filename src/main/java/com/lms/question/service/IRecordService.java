@@ -5,8 +5,11 @@ import com.lms.question.entity.dao.Record;
 import com.lms.question.entity.dao.User;
 import com.lms.question.entity.dto.QueryRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
+import com.lms.question.entity.vo.GetQuestionsAndRecordVo;
 import com.lms.question.entity.vo.RecordVo;
 import com.lms.question.entity.vo.UserBankRecordVo;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface IRecordService extends IService<Record> {
 
@@ -22,5 +25,8 @@ public interface IRecordService extends IService<Record> {
 //    //修改记录
 //    Boolean
     Boolean updateUserScore(UpdateUserScoreDto updateUserScoreDto);
+
+
+    GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request);
 
 }
