@@ -143,7 +143,11 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         //查找用户的最近没提交练习记录
         Integer uid = userService.getLoginUser(request).getUid();
         UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
-        List<RecordVo> tempRecord = CacheUtils.getTempRecord(userNotRecentlySubmitted.getId());
+        List<RecordVo> tempRecord=null;
+        if(userNotRecentlySubmitted!=null){
+            tempRecord = CacheUtils.getTempRecord(userNotRecentlySubmitted.getId());
+        }
+
         //如果是第一次练习就插入练习记录
         UserBank userBank=null;
         if (tempRecord == null) {

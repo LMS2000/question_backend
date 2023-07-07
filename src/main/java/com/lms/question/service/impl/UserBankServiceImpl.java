@@ -108,6 +108,8 @@ public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> i
         List<UserBank> list = this.list(new QueryWrapper<UserBank>().eq("bank_id", bid)
                 .eq("user_id", uid).eq("type",type).eq("submit", NOT_SUBMMITTED).orderByDesc("update_time")
                 .last(String.format("LIMIT %d", 1)));
+
+        if(list==null||list.size()<1)return null;
         return USER_BANK_CONVERTER.toUserBankVo(list.get(0));
     }
 
