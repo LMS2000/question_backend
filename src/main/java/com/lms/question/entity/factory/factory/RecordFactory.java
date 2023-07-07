@@ -20,6 +20,7 @@ public class RecordFactory {
         }
         )
         RecordVo toRecordVo(Record record);
+        List<Record>   toListRecord(List<RecordVo> recordVoList);
         List<RecordVo> toListRecordVo(List<Record> records);
     }
 }

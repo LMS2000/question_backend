@@ -1,15 +1,13 @@
 package com.lms.question;
 
-import com.lms.question.entity.dto.AddUserDto;
-import com.lms.question.entity.vo.RecordVo;
-import com.lms.question.service.IUserService;
-import com.lms.question.utis.CacheUtils;
+
+import com.lms.redis.RedisCache;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @SpringBootTest(classes = MainApplication.class)
 public class mainTest {
@@ -18,8 +16,14 @@ public class mainTest {
     /**
      * 测试缓冲用户记录
      */
+
+    @Resource
+    private RedisCache redisCache;
     @Test
     public void test2(){
+
+        RedisTemplate redisTemplate = redisCache.redisTemplate;
+        System.out.println(redisTemplate);
 
 //        List<RecordVo> list=new ArrayList<>();
 //        list.add(RecordVo.builder().id(1).questionId(1).score(0f).build());

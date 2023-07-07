@@ -23,6 +23,9 @@ public class GapFillingScoringStrategy implements ScoringStrategy{
         Float questionScore = question.getQuestionScore();
         String questionAnswer = question.getAnswer().trim();
         String userAnswer = recordVo.getUserAnswer().trim();
+
+        //todo 修改每个空给多少分？
+
         //对比用户的答案和正确答案，忽略大小写
         if(StringUtils.isNotBlank(userAnswer)&&questionAnswer.equalsIgnoreCase(userAnswer)){
             recordVo.setScore(questionScore);

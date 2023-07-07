@@ -25,6 +25,12 @@ public class CacheUtils {
         return true;
     }
 
+
+    public static  void removeTempRecord(Integer ubid){
+        RedisCache redisCache = SpringUtil.getBean(RedisCache.class);
+        redisCache.deleteObject(getHeader(ubid));
+    }
+
     public static String getHeader(Integer ubid){
         return RecordHeaderConstant.USER_RECORD+ubid;
     }

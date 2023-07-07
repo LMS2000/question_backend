@@ -5,30 +5,38 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lms.question.constants.BankConstant;
+import com.lms.question.constants.QuestionConstant;
 import com.lms.question.entity.dao.*;
 import com.lms.question.entity.dto.QueryRecordDto;
 import com.lms.question.entity.dto.SaveUserRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
+import com.lms.question.entity.enums.QuestionTypeEnum;
+import com.lms.question.entity.factory.factory.RecordFactory;
 import com.lms.question.entity.vo.*;
 import com.lms.question.exception.BusinessException;
 import com.lms.question.mapper.RecordMapper;
 import com.lms.question.mapper.UserMapper;
 import com.lms.question.service.*;
+import com.lms.question.strategy.ScoringStrategy;
+import com.lms.question.strategy.ScoringStrategyFactory;
 import com.lms.question.utis.CacheUtils;
 import com.lms.question.utis.MybatisUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ehcache.Cache;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.lms.question.constants.BankConstant.SUBMITTED;
 import static com.lms.question.entity.factory.factory.BankFactory.BANK_CONVERTER;
 import static com.lms.question.entity.factory.factory.QuestionFactory.QUESTION_CONVERTER;
 import static com.lms.question.entity.factory.factory.RecordFactory.RECORD_CONVERTER;
@@ -146,14 +154,10 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         List<RecordVo> tempRecord=null;
         if(userNotRecentlySubmitted!=null){
             tempRecord = CacheUtils.getTempRecord(userNotRecentlySubmitted.getId());
-        }
-
-        //如果是第一次练习就插入练习记录
-        UserBank userBank=null;
-        if (tempRecord == null) {
-             userBank = UserBank.builder().bankId(id).userId(uid).type(type).build();
+        }else{
+           UserBank  userBank = UserBank.builder().bankId(id).userId(uid).type(type).build();
             userBankService.save(userBank);
-
+            userNotRecentlySubmitted = USER_BANK_CONVERTER.toUserBankVo(userBank);
         }
         List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", id)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
         List<Question> questionList = null;
@@ -168,7 +172,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         }
         List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
         return GetQuestionsAndRecordVo.builder().questionVoList(questionVos)
-                .recordVoList(tempRecord).ubid(ObjectUtils.isNotEmpty(userBank)?userBank.getId():null).type(type).build();
+                .recordVoList(tempRecord).ubid(ObjectUtils.isNotEmpty(userNotRecentlySubmitted)?userNotRecentlySubmitted.getId():null).type(type).build();
     }
 
     /**
@@ -195,12 +199,41 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
      * @return
      */
     @Override
+    @Transactional
     public Boolean calculateScore(SaveUserRecordDto saveUserRecordDto) {
 
         List<RecordVo> recordVoList = saveUserRecordDto.getRecordVoList();
+        UserBank userBank = userBankService.getById(saveUserRecordDto.getUbid());
+        BusinessException.throwIf(userBank==null);
+        Integer bankId = userBank.getBankId();
+        List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", bankId)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
 
+        Map<Integer, Question> questionMap = questionService.list(new QueryWrapper<Question>()
+                .in("id", qids)).stream()
+                .collect(Collectors.toMap(Question::getId, Function.identity()));
 
-        return null;
+        float finalScore=0f;
+
+        //记录分数
+        for (RecordVo recordVo : recordVoList) {
+            Integer type = questionMap.get(recordVo.getQuestionId()).getType();
+            QuestionTypeEnum questionTypeEnum = Optional.ofNullable(QuestionTypeEnum.getEnumByValue(type))
+                    .orElse(QuestionTypeEnum.SINGLE);
+            //获取生成器
+            ScoringStrategy scoringStrategy= ScoringStrategyFactory.getScoringStrategy(questionTypeEnum);
+            float scoring = scoringStrategy.scoring(recordVo, questionMap);
+            finalScore+=scoring;
+        }
+        userBank.setScore(finalScore);
+        userBank.setSubmit(SUBMITTED);
+        //保存分数 更新用户这次记录的状态为提交状态
+        userBankService.updateById(userBank);
+
+        List<Record> records = RECORD_CONVERTER.toListRecord(recordVoList);
+        //删除缓冲
+        CacheUtils.removeTempRecord(saveUserRecordDto.getUbid());
+        //保存记录
+        return this.saveBatch(records);
     }
 
     private boolean validCorrect(Integer value) {

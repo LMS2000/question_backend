@@ -22,6 +22,7 @@ public class QuestionFactory {
         )
 //        User toBank(UserDto userDto);
         QuestionVo toQuestionVo(Question question);
+
         List<QuestionVo> toListQuestionVo(List<Question> questions);
     }
 }

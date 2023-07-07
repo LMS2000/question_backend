@@ -85,7 +85,7 @@ public class RecordController {
      */
     @PostMapping("/submit")
     public Boolean submitPaper(@RequestBody SaveUserRecordDto saveUserRecordDto){
-         return null;
+         return recordService.calculateScore(saveUserRecordDto);
     }
 
 
