@@ -2,8 +2,8 @@ package com.lms.question.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.lms.question.entity.dao.Record;
-import com.lms.question.entity.dao.User;
 import com.lms.question.entity.dto.QueryRecordDto;
+import com.lms.question.entity.dto.SaveUserRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
 import com.lms.question.entity.vo.GetQuestionsAndRecordVo;
 import com.lms.question.entity.vo.RecordVo;
@@ -28,5 +28,11 @@ public interface IRecordService extends IService<Record> {
 
 
     GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request);
+
+    Boolean saveTempUserRecord(SaveUserRecordDto saveTempUserRecordDto);
+
+    //提交用户答题情况，计算各个题目的得分和用户这套卷子的总分
+
+    Boolean  calculateScore(SaveUserRecordDto saveUserRecordDto);
 
 }

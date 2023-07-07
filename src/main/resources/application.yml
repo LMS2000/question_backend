@@ -6,6 +6,9 @@ server:
       max-request-size: 1024MB
     context-path: /eqbs
 #自设计的工具库starter,enableGlobalResponse开启全局响应，enablePage开启分页配置
+lms:
+  global:
+    enableRedis: true
 
 
 spring:

@@ -2,7 +2,9 @@ package com.lms.question.controller;
 
 import com.lms.question.annotation.AuthCheck;
 import com.lms.question.constants.UserConstant;
+import com.lms.question.entity.dao.Record;
 import com.lms.question.entity.dto.QueryRecordDto;
+import com.lms.question.entity.dto.SaveUserRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
 import com.lms.question.entity.vo.GetQuestionsAndRecordVo;
 import com.lms.question.entity.vo.QuestionVo;
@@ -10,6 +12,7 @@ import com.lms.question.entity.vo.RecordVo;
 import com.lms.question.entity.vo.UserBankRecordVo;
 import com.lms.question.service.IRecordService;
 import com.lms.result.EnableResponseAdvice;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -53,6 +56,7 @@ public class RecordController {
     //
     /**
      * 根据模式，题库id，和用户id获取用户最近练习记录和题库的一套题
+     * 返回的
      * @param id
      * @return
      */
@@ -62,12 +66,27 @@ public class RecordController {
         return recordService.getQuestionsByMode(id,type,request);
     }
 
-//    //临时保存用户记录
-//
-//    //
-//    public Boolean saveTempUserBankRecord(){
-//
-//    }
+    //临时保存用户记录
+
+    //
+
+    /**
+     * 临时保存用户答题情况，需要recordList 用户记录ubid
+     * @return
+     */
+    @PostMapping("/save/temp")
+    public Boolean saveTempUserBankRecord(@Validated @RequestBody SaveUserRecordDto saveUserRecordDto){
+         return recordService.saveTempUserRecord(saveUserRecordDto);
+    }
+
+    /**
+     * 提交全部题目，计算用户的得分
+     * @return
+     */
+    @PostMapping("/submit")
+    public Boolean submitPaper(@RequestBody SaveUserRecordDto saveUserRecordDto){
+         return null;
+    }
 
 
 }

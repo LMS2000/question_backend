@@ -123,11 +123,6 @@ public class QuestionBankImpl extends ServiceImpl<QuestionBankMapper, QuestionBa
 
     }
 
-
-
-
-
-
     private boolean validType(Integer type) {
         List<Integer> types = List.of(0, 1, 2, 3, 4);
         return ObjectUtils.isNotEmpty(type) && types.contains(type);

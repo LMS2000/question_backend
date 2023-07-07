@@ -7,15 +7,18 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lms.question.constants.BankConstant;
 import com.lms.question.entity.dao.*;
 import com.lms.question.entity.dto.QueryRecordDto;
+import com.lms.question.entity.dto.SaveUserRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
 import com.lms.question.entity.vo.*;
 import com.lms.question.exception.BusinessException;
 import com.lms.question.mapper.RecordMapper;
 import com.lms.question.mapper.UserMapper;
 import com.lms.question.service.*;
+import com.lms.question.utis.CacheUtils;
 import com.lms.question.utis.MybatisUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.ehcache.Cache;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -64,8 +67,8 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         //先查询属于ubid并且 ==correct
 
         Map<Integer, Question> questionMap = questionService.list(new QueryWrapper<Question>()
-                .like(StringUtils.isNotBlank(questionStem), "question_stem", questionStem)
-                .eq(validType(type), "type", type)).stream()
+                        .like(StringUtils.isNotBlank(questionStem), "question_stem", questionStem)
+                        .eq(validType(type), "type", type)).stream()
                 .collect(Collectors.toMap(Question::getId, Function.identity()));
 
         Set<Integer> qids = questionMap.keySet();
@@ -77,8 +80,8 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         List<RecordVo> recordVos = RECORD_CONVERTER.toListRecordVo(recordList);
         recordVos.forEach(record -> {
             Integer questionId = record.getQuestionId();
-          record.setQuestionVo(  QUESTION_CONVERTER
-                  .toQuestionVo( questionMap.getOrDefault(questionId,null)));
+            record.setQuestionVo(QUESTION_CONVERTER
+                    .toQuestionVo(questionMap.getOrDefault(questionId, null)));
         });
 
         //封装用户答题记录
@@ -118,9 +121,9 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
         //判断修改的得分是否大于题目的总分数
         Question question = questionService.getById(questionId);
-        BusinessException.throwIf(question==null);
-        BusinessException.throwIf(score>question.getQuestionScore());
-        return this.update(new UpdateWrapper<Record>().set("score",score).eq("id",recordId));
+        BusinessException.throwIf(question == null);
+        BusinessException.throwIf(score > question.getQuestionScore());
+        return this.update(new UpdateWrapper<Record>().set("score", score).eq("id", recordId));
     }
 
 
@@ -136,27 +139,59 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     @Override
     public GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request) {
 
+
         //查找用户的最近没提交练习记录
-//        UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
-        List<Integer> qids= questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", id)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
-        List<Question> questionList=null;
+        Integer uid = userService.getLoginUser(request).getUid();
+        UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
+        List<RecordVo> tempRecord = CacheUtils.getTempRecord(userNotRecentlySubmitted.getId());
+        //如果是第一次练习就插入练习记录
+        UserBank userBank=null;
+        if (tempRecord == null) {
+             userBank = UserBank.builder().bankId(id).userId(uid).type(type).build();
+            userBankService.save(userBank);
+
+        }
+        List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", id)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
+        List<Question> questionList = null;
         //如果是考试状态没有答案
-        if(type.equals(BankConstant.EXAMINATION_STATE)){
+        if (type.equals(BankConstant.EXAMINATION_STATE)) {
             questionList = questionService.list(new QueryWrapper<Question>().in("id", qids)
                     .select("id", "question_stem", "type", "options", "question_score"));
-        }else{
+        } else {
             questionList = questionService.list(new QueryWrapper<Question>().in("id", qids)
                     .select("id", "question_stem", "type",
-                            "options", "question_score","answer","explanation"));
+                            "options", "question_score", "answer", "explanation"));
         }
         List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
-//        List<Record> records = this.list(new QueryWrapper<Record>().eq("user_bank_id", userNotRecentlySubmitted.getId()));
-
-        return GetQuestionsAndRecordVo.builder().questionVoList(questionVos).type(type).build();
+        return GetQuestionsAndRecordVo.builder().questionVoList(questionVos)
+                .recordVoList(tempRecord).ubid(ObjectUtils.isNotEmpty(userBank)?userBank.getId():null).type(type).build();
     }
 
-    private boolean validCorrect(Integer value){
-        return ObjectUtils.isNotEmpty(value)&&(value.equals(0)||value.equals(1));
+    /**
+     * 保存临时练习记录
+     * @param saveTempUserRecordDto
+     * @return
+     */
+    @Override
+    public Boolean saveTempUserRecord(SaveUserRecordDto saveTempUserRecordDto) {
+
+        List<RecordVo> recordVoList = saveTempUserRecordDto.getRecordVoList();
+        Integer ubid = saveTempUserRecordDto.getUbid();
+        //缓冲
+        CacheUtils.setTempRecord(ubid ,recordVoList);
+        return true;
+    }
+
+
+    @Override
+    public Boolean calculateScore(SaveUserRecordDto saveUserRecordDto) {
+
+       return null;
+
+    }
+
+    private boolean validCorrect(Integer value) {
+        return ObjectUtils.isNotEmpty(value) && (value.equals(0) || value.equals(1));
     }
 
     private boolean validType(Integer type) {

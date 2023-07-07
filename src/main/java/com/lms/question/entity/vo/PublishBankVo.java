@@ -23,5 +23,6 @@ public class PublishBankVo implements Serializable {
      */
     private List<Integer>  userBankIds;
 
+
     private Page<BankVo>   bankVoPage;
 }
