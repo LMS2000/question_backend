@@ -9,10 +9,25 @@ import java.util.stream.Collectors;
 
 public enum QuestionTypeEnum {
 
+   /*
+     单选
+    */
     SINGLE(0),
+    /*
+     多选
+    */
     MULTIPLE(1),
+    /*
+     填空
+    */
     GAP_FILLING(2),
+    /*
+     判断
+    */
     TRUE_OR_FALSE(3),
+    /*
+     主观
+    */
     SUBJECTIVE(4);
 
     private final Integer value;

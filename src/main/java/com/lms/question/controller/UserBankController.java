@@ -46,6 +46,7 @@ public class UserBankController {
      * @return
      */
     @PostMapping("/page/user")
+    @ApiOperation("获取当前用户的条件分页练习记录")
     public Page<UserBankVo> getCurrentUserBanks(@RequestBody QueryUserBankDto queryUserBankDto, HttpServletRequest request){
         return userBankService.getCurrentUserBanks(queryUserBankDto,request);
     }
