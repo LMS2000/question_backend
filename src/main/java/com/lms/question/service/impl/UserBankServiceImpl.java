@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lms.question.entity.dao.Bank;
 import com.lms.question.entity.dao.User;
 import com.lms.question.entity.dao.UserBank;
+import com.lms.question.entity.dto.QueryCurrentUserBanksDto;
 import com.lms.question.entity.dto.QueryUserBankDto;
 import com.lms.question.entity.vo.BankVo;
 import com.lms.question.entity.vo.UserBankVo;
@@ -114,16 +115,17 @@ public class UserBankServiceImpl extends ServiceImpl<UserBankMapper, UserBank> i
     }
 
     @Override
-    public Page<UserBankVo> getCurrentUserBanks(QueryUserBankDto queryUserBankDto,HttpServletRequest request) {
-        Integer type = queryUserBankDto.getType();
-        Integer pageSize = queryUserBankDto.getPageSize();
-        Integer pageNum = queryUserBankDto.getPageNum();
-        Integer submit = queryUserBankDto.getSubmit();
+    public Page<UserBankVo> getCurrentUserBanks(QueryCurrentUserBanksDto queryCurrentUserBanksDto, HttpServletRequest request) {
+        Integer type = queryCurrentUserBanksDto.getType();
+        Integer pageSize = queryCurrentUserBanksDto.getPageSize();
+        Integer pageNum = queryCurrentUserBanksDto.getPageNum();
+        Integer submit = queryCurrentUserBanksDto.getSubmit();
         //先获取两个列表map
         //
         Integer uid = userService.getLoginUser(request).getUid();
         Map<Integer, Bank> bankMap = bankService.list(null).stream()
                 .collect(Collectors.toMap(Bank::getId, Function.identity()));
+
 
         Page<UserBank> page = this.page(new Page<>(pageNum, pageSize), new QueryWrapper<UserBank>()
                 .eq( "user_id", uid)

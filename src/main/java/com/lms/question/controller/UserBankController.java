@@ -3,6 +3,7 @@ package com.lms.question.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lms.question.annotation.AuthCheck;
 import com.lms.question.constants.UserConstant;
+import com.lms.question.entity.dto.QueryCurrentUserBanksDto;
 import com.lms.question.entity.dto.QueryUserBankDto;
 import com.lms.question.entity.vo.UserBankVo;
 import com.lms.question.service.IUserBankService;
@@ -41,14 +42,14 @@ public class UserBankController {
 
     /**
      * 获取当前用户的条件分页练习记录
-     * @param queryUserBankDto
+     * @param queryCurrentUserBanksDto
      * @param request
      * @return
      */
     @PostMapping("/page/user")
     @ApiOperation("获取当前用户的条件分页练习记录")
-    public Page<UserBankVo> getCurrentUserBanks(@RequestBody QueryUserBankDto queryUserBankDto, HttpServletRequest request){
-        return userBankService.getCurrentUserBanks(queryUserBankDto,request);
+    public Page<UserBankVo> getCurrentUserBanks(@RequestBody QueryCurrentUserBanksDto queryCurrentUserBanksDto, HttpServletRequest request){
+        return userBankService.getCurrentUserBanks(queryCurrentUserBanksDto,request);
     }
 
 

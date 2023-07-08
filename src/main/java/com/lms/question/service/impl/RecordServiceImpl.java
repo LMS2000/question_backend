@@ -256,6 +256,8 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
     }
 
+
+
     private boolean validCorrect(Integer value) {
         return ObjectUtils.isNotEmpty(value) && (value.equals(0) || value.equals(1));
     }

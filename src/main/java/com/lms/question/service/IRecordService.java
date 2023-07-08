@@ -8,8 +8,10 @@ import com.lms.question.entity.dto.UpdateUserScoreDto;
 import com.lms.question.entity.vo.GetQuestionsAndRecordVo;
 import com.lms.question.entity.vo.RecordVo;
 import com.lms.question.entity.vo.UserBankRecordVo;
+import com.lms.question.entity.vo.UserQuestionBrushingVo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public interface IRecordService extends IService<Record> {
 

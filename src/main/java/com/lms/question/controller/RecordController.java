@@ -6,14 +6,13 @@ import com.lms.question.entity.dao.Record;
 import com.lms.question.entity.dto.QueryRecordDto;
 import com.lms.question.entity.dto.SaveUserRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
-import com.lms.question.entity.vo.GetQuestionsAndRecordVo;
-import com.lms.question.entity.vo.QuestionVo;
-import com.lms.question.entity.vo.RecordVo;
-import com.lms.question.entity.vo.UserBankRecordVo;
+import com.lms.question.entity.vo.*;
 import com.lms.question.service.IRecordService;
+import com.lms.question.utis.CacheUtils;
 import com.lms.result.EnableResponseAdvice;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.ehcache.Cache;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -111,5 +110,17 @@ public class RecordController {
     public  GetQuestionsAndRecordVo  getCurrentUserRecords(@PathVariable("ubid") Integer ubid){
           return recordService.getCurrentUserRecords(ubid);
     }
+
+
+    /**
+     * 获取刷题量怕排名前十的用户和
+     * @return
+     */
+    @GetMapping("/get/amountRank")
+    @ApiOperation("获取刷题量怕排名前十的用户和对应刷题量")
+    public List<UserQuestionBrushingVo>  getUserQuestionRank(){
+        return CacheUtils.getUserQuestionAmount();
+    }
+
 
 }

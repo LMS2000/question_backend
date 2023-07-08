@@ -15,8 +15,8 @@ import java.io.Serializable;
 public class UserQuestionBrushingVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    //用户名
-    private Integer uid;
+    //用户
+    private UserVo user;
     //刷题量
     private Long questionAmount;
 }

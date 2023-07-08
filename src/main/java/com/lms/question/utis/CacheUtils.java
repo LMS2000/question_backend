@@ -5,6 +5,7 @@ import cn.hutool.extra.spring.SpringUtil;
 import com.lms.question.constants.RecordHeaderConstant;
 import com.lms.question.entity.vo.RecordVo;
 import com.lms.question.entity.vo.UserQuestionBrushingVo;
+import com.lms.question.entity.vo.UserVo;
 import com.lms.question.exception.BusinessException;
 import com.lms.redis.RedisCache;
 import org.springframework.data.redis.core.Cursor;
@@ -61,7 +62,7 @@ public class CacheUtils {
         RedisCache redisCache = SpringUtil.getBean(RedisCache.class);
         RedisTemplate redisTemplate = redisCache.redisTemplate;
         for (UserQuestionBrushingVo obj : questionAmounts) {
-            redisTemplate.opsForZSet().add(USER_QUESTION_AMOUNT,obj.getUid(),obj.getQuestionAmount());
+            redisTemplate.opsForZSet().add(USER_QUESTION_AMOUNT,obj.getUser(),obj.getQuestionAmount());
         }
     }
 
@@ -79,13 +80,13 @@ public class CacheUtils {
         sortedSet.addAll(set);
         List<UserQuestionBrushingVo> resultList=new ArrayList<>();
         sortedSet.forEach(value->{
-            resultList.add(UserQuestionBrushingVo.builder().uid((Integer) value.getValue())
+            resultList.add(UserQuestionBrushingVo.builder().user( (UserVo)value.getValue())
                     .questionAmount(Objects.requireNonNull(value.getScore()).longValue()).build());
       });
         return resultList;
     }
 
-
+    //获取用户答题数量，正确数量，错误数量，错误最多的体型列表（3种）
 
 
 
