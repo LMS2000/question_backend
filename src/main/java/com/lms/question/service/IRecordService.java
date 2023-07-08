@@ -43,6 +43,8 @@ public interface IRecordService extends IService<Record> {
 
     //  获取 当前用户的 正确率，刷题次数，当前的平均分
 
+    GetQuestionsAndRecordVo getCurrentUserRecords(Integer ubid);
+
 
 
 

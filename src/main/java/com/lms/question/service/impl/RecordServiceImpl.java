@@ -237,6 +237,25 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         return this.saveBatch(records);
     }
 
+    @Override
+    public GetQuestionsAndRecordVo getCurrentUserRecords(Integer ubid) {
+
+        UserBank userBank = userBankService.getById(ubid);
+
+        Integer bankId = userBank.getBankId();
+        //获取题目集
+        List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>()
+                .eq("bid", bankId)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
+        List<Question> questionList = questionService.list(new QueryWrapper<Question>().in("id", qids));
+
+
+        List<RecordVo> tempRecord = CacheUtils.getTempRecord(ubid);
+        List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
+
+        return GetQuestionsAndRecordVo.builder().recordVoList(tempRecord).questionVoList(questionVos).build();
+
+    }
+
     private boolean validCorrect(Integer value) {
         return ObjectUtils.isNotEmpty(value) && (value.equals(0) || value.equals(1));
     }

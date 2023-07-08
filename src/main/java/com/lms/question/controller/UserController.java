@@ -12,6 +12,8 @@ import com.lms.question.entity.vo.UserVo;
 import com.lms.question.exception.BusinessException;
 import com.lms.question.service.IUserService;
 import com.lms.result.EnableResponseAdvice;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +26,7 @@ import static com.lms.question.constants.UserConstant.ENABLE;
 @RestController
 @RequestMapping("/user")
 @EnableResponseAdvice
+@Api(description = "用户管理")
 public class UserController {
 
     @Resource
@@ -37,6 +40,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
+    @ApiOperation("用户登录")
     public LoginUserVo userLogin(@Validated @RequestBody LoginDto loginDto, HttpServletRequest request){
         LoginUserVo loginUserVo = userService.userLogin(loginDto, request);
         return loginUserVo;
@@ -44,6 +48,7 @@ public class UserController {
 
 
     @PostMapping("/register")
+    @ApiOperation("用户注册")
     public Boolean  userRegister(@Validated @RequestBody RegisterUserDto registerUserDto){
         return userService.registerUser(registerUserDto);
     }
@@ -54,6 +59,7 @@ public class UserController {
      * @return
      */
    @PostMapping("/logout")
+   @ApiOperation("用户登出")
    public Boolean logout(HttpServletRequest request){
         if (request == null) {
             throw new BusinessException(HttpCode.PARAMS_ERROR);
@@ -68,6 +74,7 @@ public class UserController {
      * @return
      */
     @GetMapping(value = "/get/login")
+    @ApiOperation("获取当前用户的登录信息")
     public LoginUserVo getCurrentUser(HttpServletRequest request){
         LoginUserVo loginUser = userService.getLoginUser(request);
         return loginUser;
@@ -77,12 +84,14 @@ public class UserController {
 
 
     /**
-     * 注册
+     * 添加用户
      *
      * @param userDto
      * @return
      */
     @PostMapping("/add")
+    @ApiOperation("添加用户")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Integer add(@Validated @RequestBody(required = true) AddUserDto userDto) {
         return userService.addUser(userDto);
     }
@@ -93,6 +102,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/delete")
+    @ApiOperation("批量删除用户")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean removeUser( @RequestParam("userIds") List<Integer> userIds){
         return userService.deleteUser(userIds);
@@ -148,6 +158,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/update")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean updateUser(@Validated @RequestBody UpdateUserDto userDto){
         return userService.updateUser(userDto);
     }

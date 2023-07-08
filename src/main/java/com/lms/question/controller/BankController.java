@@ -9,6 +9,8 @@ import com.lms.question.entity.vo.BankVo;
 import com.lms.question.entity.vo.PublishBankVo;
 import com.lms.question.service.IBankService;
 import com.lms.result.EnableResponseAdvice;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,7 @@ import static com.lms.question.constants.BankConstant.PUBLISHED;
 @RestController
 @RequestMapping("/bank")
 @EnableResponseAdvice
+@Api(description = "题库管理")
 public class BankController {
 
     @Resource
@@ -33,6 +36,7 @@ public class BankController {
      * @return
      */
     @PostMapping("/add")
+    @ApiOperation("添加题库")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean addBank(@Validated @RequestBody AddBankDto addBankDto){
         return bankService.addBank(addBankDto);
@@ -40,6 +44,7 @@ public class BankController {
 
 
     @PostMapping("/remove")
+    @ApiOperation("批量删除题库")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean removeBanks(@RequestParam("bids") List<Integer> bids){
         return bankService.removeBank(bids);
@@ -50,6 +55,7 @@ public class BankController {
      * @return
      */
     @PostMapping("/page")
+    @ApiOperation("分页查询题库")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Page<BankVo> pageBankList( @RequestBody QueryBankPageDto queryBankPageDto){
         return bankService.pageBankList(queryBankPageDto);
@@ -62,6 +68,7 @@ public class BankController {
      */
 
     @PostMapping("/update")
+    @ApiOperation("修改题库信息")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean updateBank(@Validated @RequestBody UpdateBankDto updateBankDto){
         return bankService.updateBank(updateBankDto);
@@ -69,6 +76,7 @@ public class BankController {
 
 
     @GetMapping("/{id}")
+    @ApiOperation("根据id获取题库")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BankVo getById(@PathVariable Integer id){
         return bankService.getBankById(id);
@@ -81,6 +89,8 @@ public class BankController {
      * @return
      */
     @PostMapping("/change/publish")
+    @ApiOperation("改变题库发布状态")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Boolean changePublish(@Validated @RequestBody ChangePublishStatusDto changePublishStatusDto){
        return bankService.changePublishBank(changePublishStatusDto);
     }
@@ -91,6 +101,7 @@ public class BankController {
      * @return
      */
     @PostMapping("/page/publish")
+    @ApiOperation("获取发布的题库")
     public PublishBankVo pagePublishBankList(@RequestBody QueryPublishDto queryPublishDto, HttpServletRequest request){
         return bankService.pagePublishBankList(queryPublishDto,request);
     }
