@@ -147,7 +147,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     @Override
     public GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request) {
 
-
+        BusinessException.throwIfNot(MybatisUtils.existCheck(bankService,Map.of("id",id)));
         //查找用户的最近没提交练习记录
         Integer uid = userService.getLoginUser(request).getUid();
         UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
@@ -182,6 +182,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
      */
     @Override
     public Boolean saveTempUserRecord(SaveUserRecordDto saveTempUserRecordDto) {
+
 
         List<RecordVo> recordVoList = saveTempUserRecordDto.getRecordVoList();
         Integer userBankId = recordVoList.get(0).getUserBankId();
