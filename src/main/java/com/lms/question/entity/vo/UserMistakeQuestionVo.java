@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Builder
 @ApiModel(value="GetUserMistakeQuestionVo", description="用户正确率需要的数据")
 @Slf4j
-public class GetUserMistakeQuestionVo implements Serializable {
+public class UserMistakeQuestionVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @ApiModelProperty(value = "错误的题目")

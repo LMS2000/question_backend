@@ -140,8 +140,20 @@ public class RecordController {
     //预测
 
 
+
+
     //错误最多的题目
 
+    /**
+     * 获取用户错误次数前三的题目个错误次数
+     * @param request
+     * @return
+     */
+    @GetMapping("/get/mistake")
+    @ApiOperation("获取用户错误次数前三的题目个错误次数")
+    public List<UserMistakeQuestionVo>  getUserMistakeQuestions(HttpServletRequest request){
+        return recordService.getMistakeQuestions(request);
+    }
 
 
 }

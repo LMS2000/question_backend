@@ -48,7 +48,7 @@ public interface IRecordService extends IService<Record> {
 
 
     //获取用户错误最多的题目
-    GetUserMistakeQuestionVo getMistakeQuestions(HttpServletRequest request);
+    List<UserMistakeQuestionVo> getMistakeQuestions(HttpServletRequest request);
 
 
 }

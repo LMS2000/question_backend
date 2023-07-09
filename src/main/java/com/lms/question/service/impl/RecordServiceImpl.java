@@ -30,16 +30,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.lms.question.constants.BankConstant.NOT_SUBMMITTED;
 import static com.lms.question.constants.BankConstant.SUBMITTED;
 import static com.lms.question.constants.QuestionConstant.CORRECT;
+import static com.lms.question.constants.QuestionConstant.UNCORRECT;
 import static com.lms.question.entity.factory.factory.BankFactory.BANK_CONVERTER;
 import static com.lms.question.entity.factory.factory.QuestionFactory.QUESTION_CONVERTER;
 import static com.lms.question.entity.factory.factory.RecordFactory.RECORD_CONVERTER;
@@ -305,18 +303,28 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
      * @return
      */
     @Override
-    public GetUserMistakeQuestionVo getMistakeQuestions(HttpServletRequest request) {
+    public List<UserMistakeQuestionVo> getMistakeQuestions(HttpServletRequest request) {
         Integer uid = userService.getLoginUser(request).getUid();
         List<Integer> ubids = userBankService.list(new QueryWrapper<UserBank>()
                 .eq("user_id", uid)).stream().map(UserBank::getId).collect(Collectors.toList());
         //用户全部错误的题目
         if(ubids.size()>0){
+            List<Question> questionList = questionService.list(new QueryWrapper<>(null));
+            Map<Integer, QuestionVo> questionVoMap = QUESTION_CONVERTER.toListQuestionVo(questionList).stream().collect(Collectors.toMap(QuestionVo::getId, Function.identity()));
+
             List<Record> records = this.list(new QueryWrapper<Record>().in("user_bank_id", ubids)
-                    .eq("correct", NOT_SUBMMITTED));
-//            records.stream().
+                    .eq("correct", UNCORRECT));
+            Map<Integer, Long> questionIdCountMap = records.stream()
+                    .limit(3)
+                    .collect(Collectors.groupingBy(Record::getQuestionId, Collectors.counting()));
+            List<UserMistakeQuestionVo> resultList=new ArrayList<>();
+           //添加用户错误前三的题目
+            questionIdCountMap.forEach((key,value)->{
+                resultList.add(UserMistakeQuestionVo.builder()
+                        .question(questionVoMap.get(key)).mistakeNum(value).build());
+            });
+            return resultList;
         }
-
-
         return null;
     }
 
