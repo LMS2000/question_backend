@@ -82,6 +82,7 @@ public class CacheUtils {
         sortedSet.forEach(value->{
             resultList.add(UserQuestionBrushingVo.builder().user( (UserVo)value.getValue())
                     .questionAmount(Objects.requireNonNull(value.getScore()).longValue()).build());
+
       });
         return resultList;
     }

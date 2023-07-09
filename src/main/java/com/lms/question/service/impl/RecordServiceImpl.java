@@ -243,17 +243,24 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
         UserBank userBank = userBankService.getById(ubid);
 
+        BusinessException.throwIf(userBank==null);
         Integer bankId = userBank.getBankId();
         //获取题目集
         List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>()
                 .eq("bid", bankId)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
         List<Question> questionList = questionService.list(new QueryWrapper<Question>().in("id", qids));
+        List<RecordVo> records=null;
+        //如果已经提交的练习记录就从数据库查找，没有的话就从缓冲中取出
+        if(userBank.getSubmit().equals(SUBMITTED)){
+            List<Record> recordList = this.list(new QueryWrapper<Record>().eq("uesr_bank_id", ubid));
+            records=RECORD_CONVERTER.toListRecordVo(recordList);
+        }else{
+            records = CacheUtils.getTempRecord(ubid);
+        }
 
-
-        List<RecordVo> tempRecord = CacheUtils.getTempRecord(ubid);
         List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
 
-        return GetQuestionsAndRecordVo.builder().recordVoList(tempRecord).questionVoList(questionVos).build();
+        return GetQuestionsAndRecordVo.builder().recordVoList(records).questionVoList(questionVos).build();
 
     }
 

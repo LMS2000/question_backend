@@ -1,6 +1,8 @@
 package com.lms.question.entity.dto;
 
 import com.lms.question.valid.RangeCheck;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,14 +17,17 @@ import java.io.Serializable;
 @Data
 @Builder
 @Slf4j
+@ApiModel(value="ChangePublishStatusDto", description="改变题目发布状态")
 public class ChangePublishStatusDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Positive(message = "id不合法")
-    @NotNull
+    @NotNull(message = "题库id不能为空")
+    @ApiModelProperty(value = "用户名")
     private Integer bid;
     @RangeCheck(range = {0,1})
-    @NotNull
+    @NotNull(message = "发布状态不能为空")
+    @ApiModelProperty(value = "题库发布状态")
     private Integer status;
 }

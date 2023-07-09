@@ -8,7 +8,6 @@ import java.util.Optional;
 
 // * 单例+工厂模式
 public class ScoringStrategyFactory {
-//    这个写法之后要详细了解下
     private static final Map<QuestionTypeEnum,ScoringStrategy> DATA_GENERATOR_POOL=new HashMap<QuestionTypeEnum,ScoringStrategy>(){{
         put(QuestionTypeEnum.SINGLE,new SingleScoringStrategy());
         put(QuestionTypeEnum.MULTIPLE,new MultipleScoringStrategy());

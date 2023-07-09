@@ -107,6 +107,7 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IB
 
     @Override
     public PublishBankVo pagePublishBankList(QueryPublishDto queryPublishDto, HttpServletRequest request) {
+
         LoginUserVo loginUser = userService.getLoginUser(request);
         List<Integer> bids = userBankService.list(new QueryWrapper<UserBank>()
                 .eq("user_id", loginUser.getUid()).eq("submit",NOT_SUBMMITTED)).stream().map(UserBank::getBankId).collect(Collectors.toList());
@@ -117,6 +118,7 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IB
         QueryWrapper<Bank> queryWrapper = new QueryWrapper<>();
         queryWrapper.like(StringUtils.isNotBlank(name), "name", name)
                 .eq("delete_flag", NOT_DELETED).eq("publish",PUBLISHED);
+
         Page<Bank> pageBank = this.page(new Page<>(pageNum, pageSize), queryWrapper);
         List<Bank> records = pageBank.getRecords();
         List<BankVo> bankVos = BANK_CONVERTER.toListBankVo(records);

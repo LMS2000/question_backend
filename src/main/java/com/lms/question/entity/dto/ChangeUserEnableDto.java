@@ -2,6 +2,8 @@ package com.lms.question.entity.dto;
 
 
 import com.lms.question.valid.RangeCheck;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,11 +18,14 @@ import java.io.Serializable;
 @Data
 @Builder
 @Slf4j
+@ApiModel(value="ChangeUserEnableDto", description="改变用户启用状态")
 public class ChangeUserEnableDto implements Serializable {
 
 
     @Positive(message = "id不合法")
+    @ApiModelProperty(value = "用户id")
     private Integer uid;
     @RangeCheck(range = {0,1})
+    @ApiModelProperty(value = "用户启用状态")
     private Integer enable;
 }

@@ -56,9 +56,13 @@ public class QuestionRankTask {
 
         List<UserQuestionBrushingVo> userQuestionBrushingVos=new ArrayList<>();
 
+
         userBankMap.forEach((key,value)->{
-            long count = recordService.count(new QueryWrapper<Record>().in("user_bank_id", value));
-            userQuestionBrushingVos.add(UserQuestionBrushingVo.builder().user(key).questionAmount(count).build());
+            if(value!=null&&value.size()>0){
+                long count = recordService.count(new QueryWrapper<Record>().in("user_bank_id", value));
+                userQuestionBrushingVos.add(UserQuestionBrushingVo.builder().user(key).questionAmount(count).build());
+            }
+
         });
 
         //设置缓冲
