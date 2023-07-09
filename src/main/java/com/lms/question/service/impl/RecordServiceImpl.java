@@ -269,10 +269,12 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         } else {
             records = CacheUtils.getTempRecord(ubid);
         }
+        UserBankVo userBankVo = USER_BANK_CONVERTER.toUserBankVo(userBank);
 
         List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
 
-        return GetQuestionsAndRecordVo.builder().recordVoList(records).questionVoList(questionVos).build();
+        return GetQuestionsAndRecordVo.builder().recordVoList(records)
+                .questionVoList(questionVos).userBankVo(userBankVo).build();
 
     }
 
