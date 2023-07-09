@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lms.contants.HttpCode;
+import com.lms.question.config.PredictServerProperties;
 import com.lms.question.constants.BankConstant;
 import com.lms.question.constants.QuestionConstant;
 import com.lms.question.entity.dao.*;
@@ -21,6 +22,7 @@ import com.lms.question.service.*;
 import com.lms.question.strategy.ScoringStrategy;
 import com.lms.question.strategy.ScoringStrategyFactory;
 import com.lms.question.utis.CacheUtils;
+import com.lms.question.utis.HttpApiUtil;
 import com.lms.question.utis.MybatisUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -63,6 +65,10 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
     @Resource
     private IQuestionBankService questionBankService;
+
+
+    @Resource
+    private PredictServerProperties predictServerProperties;
 
     @Override
     public UserBankRecordVo getRecordByUserBankId(Integer ubid, QueryRecordDto queryRecordDto) {
@@ -280,20 +286,21 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
     /**
      * 获取用户的刷题量和正确率
+     *
      * @return
      */
     @Override
     public GetUserAccuracyRateVo getUserRate(HttpServletRequest request) {
         Integer uid = userService.getLoginUser(request).getUid();
         List<Integer> ubids = userBankService.list(new QueryWrapper<UserBank>()
-                .eq("user_id", uid).eq("submit",SUBMITTED)).stream().map(UserBank::getId).collect(Collectors.toList());
+                .eq("user_id", uid).eq("submit", SUBMITTED)).stream().map(UserBank::getId).collect(Collectors.toList());
         //如果用户存在练习记录
-        if(ubids.size()>0){
+        if (ubids.size() > 0) {
             //获取用户的全部刷题量和正确数量
-            List<Record> records= this.list(new QueryWrapper<Record>().in("user_bank_id", ubids));
+            List<Record> records = this.list(new QueryWrapper<Record>().in("user_bank_id", ubids));
             long rightNum = records.stream().filter(record -> record.getCorrect().equals(CORRECT)).count();
             return GetUserAccuracyRateVo.builder().rightNum(rightNum).questionAmount((long) records.size()).build();
-        }else{
+        } else {
 
             return GetUserAccuracyRateVo.builder().questionAmount(0L).rightNum(0L).build();
         }
@@ -301,6 +308,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
     /**
      * 获取用户错误最多的三个题目
+     *
      * @param request
      * @return
      */
@@ -310,7 +318,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         List<Integer> ubids = userBankService.list(new QueryWrapper<UserBank>()
                 .eq("user_id", uid)).stream().map(UserBank::getId).collect(Collectors.toList());
         //用户全部错误的题目
-        if(ubids.size()>0){
+        if (ubids.size() > 0) {
             List<Question> questionList = questionService.list(new QueryWrapper<>(null));
             Map<Integer, QuestionVo> questionVoMap = QUESTION_CONVERTER.toListQuestionVo(questionList).stream().collect(Collectors.toMap(QuestionVo::getId, Function.identity()));
 
@@ -319,15 +327,22 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
             Map<Integer, Long> questionIdCountMap = records.stream()
                     .limit(3)
                     .collect(Collectors.groupingBy(Record::getQuestionId, Collectors.counting()));
-            List<UserMistakeQuestionVo> resultList=new ArrayList<>();
-           //添加用户错误前三的题目
-            questionIdCountMap.forEach((key,value)->{
+            List<UserMistakeQuestionVo> resultList = new ArrayList<>();
+            //添加用户错误前三的题目
+            questionIdCountMap.forEach((key, value) -> {
                 resultList.add(UserMistakeQuestionVo.builder()
                         .question(questionVoMap.get(key)).mistakeNum(value).build());
             });
             return resultList;
         }
         return null;
+    }
+
+    @Override
+    public Float getPredictScore(HttpServletRequest request) {
+        Integer uid = userService.getLoginUser(request).getUid();
+        HttpApiUtil.buildCSVFile(uid);
+        return HttpApiUtil.getPredictData(predictServerProperties, uid);
     }
 
 

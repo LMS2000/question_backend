@@ -28,6 +28,10 @@ swagger:
   title: question-server
   version: 1.0.0
   description: 深度学习题库练习系统
+predict-server:
+  predict-url: http://localhost:5000/predict
+
+
 
 mybatis-plus:
   configuration:

@@ -51,4 +51,6 @@ public interface IRecordService extends IService<Record> {
     List<UserMistakeQuestionVo> getMistakeQuestions(HttpServletRequest request);
 
 
+    Float  getPredictScore(HttpServletRequest request);
+
 }

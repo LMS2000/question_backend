@@ -1,6 +1,7 @@
 package com.lms.question.controller;
 
 import com.lms.question.annotation.AuthCheck;
+import com.lms.question.config.PredictServerProperties;
 import com.lms.question.constants.UserConstant;
 import com.lms.question.entity.dao.Record;
 import com.lms.question.entity.dto.QueryRecordDto;
@@ -29,6 +30,7 @@ public class RecordController {
 
     @Resource
     private IRecordService recordService;
+
 
 
     @PostMapping("/page/{id}")
@@ -153,6 +155,13 @@ public class RecordController {
     @ApiOperation("获取用户错误次数前三的题目个错误次数")
     public List<UserMistakeQuestionVo>  getUserMistakeQuestions(HttpServletRequest request){
         return recordService.getMistakeQuestions(request);
+    }
+
+
+    @GetMapping("/get/predict")
+    @ApiOperation("预测用户最终的成绩")
+    public Float getPredictScore(HttpServletRequest request){
+        return recordService.getPredictScore(request);
     }
 
 
