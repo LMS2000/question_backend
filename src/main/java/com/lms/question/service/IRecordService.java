@@ -47,6 +47,8 @@ public interface IRecordService extends IService<Record> {
     GetUserAccuracyRateVo  getUserRate(HttpServletRequest request);
 
 
+    //获取用户错误最多的题目
+    GetUserMistakeQuestionVo getMistakeQuestions(HttpServletRequest request);
 
 
 }

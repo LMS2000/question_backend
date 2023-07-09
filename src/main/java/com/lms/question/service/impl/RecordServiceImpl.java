@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.lms.question.constants.BankConstant.NOT_SUBMMITTED;
 import static com.lms.question.constants.BankConstant.SUBMITTED;
 import static com.lms.question.constants.QuestionConstant.CORRECT;
 import static com.lms.question.entity.factory.factory.BankFactory.BANK_CONVERTER;
@@ -265,7 +266,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         List<RecordVo> records = null;
         //如果已经提交的练习记录就从数据库查找，没有的话就从缓冲中取出
         if (userBank.getSubmit().equals(SUBMITTED)) {
-            List<Record> recordList = this.list(new QueryWrapper<Record>().eq("uesr_bank_id", ubid));
+            List<Record> recordList = this.list(new QueryWrapper<Record>().eq("user_bank_id", ubid));
             records = RECORD_CONVERTER.toListRecordVo(recordList);
         } else {
             records = CacheUtils.getTempRecord(ubid);
@@ -296,6 +297,27 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
             return GetUserAccuracyRateVo.builder().questionAmount(0L).rightNum(0L).build();
         }
+    }
+
+    /**
+     * 获取用户错误最多的三个题目
+     * @param request
+     * @return
+     */
+    @Override
+    public GetUserMistakeQuestionVo getMistakeQuestions(HttpServletRequest request) {
+        Integer uid = userService.getLoginUser(request).getUid();
+        List<Integer> ubids = userBankService.list(new QueryWrapper<UserBank>()
+                .eq("user_id", uid)).stream().map(UserBank::getId).collect(Collectors.toList());
+        //用户全部错误的题目
+        if(ubids.size()>0){
+            List<Record> records = this.list(new QueryWrapper<Record>().in("user_bank_id", ubids)
+                    .eq("correct", NOT_SUBMMITTED));
+//            records.stream().
+        }
+
+
+        return null;
     }
 
 
