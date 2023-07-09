@@ -5,10 +5,7 @@ import com.lms.question.entity.dao.Record;
 import com.lms.question.entity.dto.QueryRecordDto;
 import com.lms.question.entity.dto.SaveUserRecordDto;
 import com.lms.question.entity.dto.UpdateUserScoreDto;
-import com.lms.question.entity.vo.GetQuestionsAndRecordVo;
-import com.lms.question.entity.vo.RecordVo;
-import com.lms.question.entity.vo.UserBankRecordVo;
-import com.lms.question.entity.vo.UserQuestionBrushingVo;
+import com.lms.question.entity.vo.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -47,7 +44,7 @@ public interface IRecordService extends IService<Record> {
 
      //实时
     //获取用户答题数量，正确数量，错误数量，
-
+    GetUserAccuracyRateVo  getUserRate(HttpServletRequest request);
 
 
 

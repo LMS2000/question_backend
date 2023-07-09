@@ -67,7 +67,6 @@ public class RecordController {
      * @return
      */
     @GetMapping("/get/page/{id}/{type}")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @ApiOperation("根据模式，题库id，和用户id获取用户最近练习记录和题库的一套题")
     public GetQuestionsAndRecordVo getQuestionsByMode(@PathVariable("id") Integer id, @PathVariable("type") Integer  type,
                                                       HttpServletRequest request){
@@ -120,6 +119,17 @@ public class RecordController {
     @ApiOperation("获取刷题量怕排名前十的用户和对应刷题量")
     public List<UserQuestionBrushingVo>  getUserQuestionRank(){
         return CacheUtils.getUserQuestionAmount();
+    }
+
+    /**
+     * 获取用户的刷题量和正确数量
+     * @param request
+     * @return
+     */
+    @GetMapping("/get/amount")
+    @ApiOperation("获取用户的刷题量和正确数量")
+    public GetUserAccuracyRateVo getUserAccuracyRateVo(HttpServletRequest request){
+        return recordService.getUserRate(request);
     }
 
 

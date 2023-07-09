@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.lms.contants.HttpCode;
 import com.lms.question.constants.BankConstant;
 import com.lms.question.constants.QuestionConstant;
 import com.lms.question.entity.dao.*;
@@ -37,6 +38,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.lms.question.constants.BankConstant.SUBMITTED;
+import static com.lms.question.constants.QuestionConstant.CORRECT;
 import static com.lms.question.entity.factory.factory.BankFactory.BANK_CONVERTER;
 import static com.lms.question.entity.factory.factory.QuestionFactory.QUESTION_CONVERTER;
 import static com.lms.question.entity.factory.factory.RecordFactory.RECORD_CONVERTER;
@@ -147,15 +149,15 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     @Override
     public GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request) {
 
-        BusinessException.throwIfNot(MybatisUtils.existCheck(bankService,Map.of("id",id)));
+        BusinessException.throwIfNot(MybatisUtils.existCheck(bankService, Map.of("id", id)));
         //查找用户的最近没提交练习记录
         Integer uid = userService.getLoginUser(request).getUid();
         UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
-        List<RecordVo> tempRecord=null;
-        if(userNotRecentlySubmitted!=null){
+        List<RecordVo> tempRecord = null;
+        if (userNotRecentlySubmitted != null) {
             tempRecord = CacheUtils.getTempRecord(userNotRecentlySubmitted.getId());
-        }else{
-           UserBank  userBank = UserBank.builder().bankId(id).userId(uid).type(type).build();
+        } else {
+            UserBank userBank = UserBank.builder().bankId(id).userId(uid).type(type).build();
             userBankService.save(userBank);
             userNotRecentlySubmitted = USER_BANK_CONVERTER.toUserBankVo(userBank);
         }
@@ -172,11 +174,12 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         }
         List<QuestionVo> questionVos = QUESTION_CONVERTER.toListQuestionVo(questionList);
         return GetQuestionsAndRecordVo.builder().questionVoList(questionVos)
-                .recordVoList(tempRecord).ubid(ObjectUtils.isNotEmpty(userNotRecentlySubmitted)?userNotRecentlySubmitted.getId():null).type(type).build();
+                .recordVoList(tempRecord).ubid(ObjectUtils.isNotEmpty(userNotRecentlySubmitted) ? userNotRecentlySubmitted.getId() : null).type(type).build();
     }
 
     /**
      * 保存临时练习记录
+     *
      * @param saveTempUserRecordDto
      * @return
      */
@@ -186,15 +189,16 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
         List<RecordVo> recordVoList = saveTempUserRecordDto.getRecordVoList();
         Integer userBankId = recordVoList.get(0).getUserBankId();
+        BusinessException.throwIfNot(MybatisUtils.existCheck(userBankService, Map.of("id", userBankId)));
         //缓冲
-        CacheUtils.setTempRecord(userBankId ,recordVoList);
+        CacheUtils.setTempRecord(userBankId, recordVoList);
         return true;
     }
 
 
     /**
      * 思路：
-     *  首先获取目标题目的题库列表，然后进入策略模式填充每一个Record的分数，并且返回该题目的得分
+     * 首先获取目标题目的题库列表，然后进入策略模式填充每一个Record的分数，并且返回该题目的得分
      *
      * @param saveUserRecordDto
      * @return
@@ -204,17 +208,25 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     public Boolean calculateScore(SaveUserRecordDto saveUserRecordDto) {
 
         List<RecordVo> recordVoList = saveUserRecordDto.getRecordVoList();
+        //校验用户答题情况
+        BusinessException.throwIf(recordVoList == null || recordVoList.size() < 1, HttpCode.PARAMS_ERROR,
+                "答题列表不能为空");
+
         Integer userBankId = recordVoList.get(0).getUserBankId();
         UserBank userBank = userBankService.getById(userBankId);
-        BusinessException.throwIf(userBank==null);
+        BusinessException.throwIf(userBank == null);
         Integer bankId = userBank.getBankId();
         List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", bankId)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
+        //校验是否打完全部题目
+        BusinessException.throwIf(recordVoList.size() != qids.size(), HttpCode.PARAMS_ERROR, "没有答题完整");
 
         Map<Integer, Question> questionMap = questionService.list(new QueryWrapper<Question>()
-                .in("id", qids)).stream()
+                        .in("id", qids)).stream()
                 .collect(Collectors.toMap(Question::getId, Function.identity()));
 
-        float finalScore=0f;
+
+        //开始记录分数
+        float finalScore = 0f;
 
         //记录分数
         for (RecordVo recordVo : recordVoList) {
@@ -222,10 +234,11 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
             QuestionTypeEnum questionTypeEnum = Optional.ofNullable(QuestionTypeEnum.getEnumByValue(type))
                     .orElse(QuestionTypeEnum.SINGLE);
             //获取生成器
-            ScoringStrategy scoringStrategy= ScoringStrategyFactory.getScoringStrategy(questionTypeEnum);
+            ScoringStrategy scoringStrategy = ScoringStrategyFactory.getScoringStrategy(questionTypeEnum);
             float scoring = scoringStrategy.scoring(recordVo, questionMap);
-            finalScore+=scoring;
+            finalScore += scoring;
         }
+        //设置提交状态设置分数
         userBank.setScore(finalScore);
         userBank.setSubmit(SUBMITTED);
         //保存分数 更新用户这次记录的状态为提交状态
@@ -243,18 +256,18 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
         UserBank userBank = userBankService.getById(ubid);
 
-        BusinessException.throwIf(userBank==null);
+        BusinessException.throwIf(userBank == null);
         Integer bankId = userBank.getBankId();
         //获取题目集
         List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>()
                 .eq("bid", bankId)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
         List<Question> questionList = questionService.list(new QueryWrapper<Question>().in("id", qids));
-        List<RecordVo> records=null;
+        List<RecordVo> records = null;
         //如果已经提交的练习记录就从数据库查找，没有的话就从缓冲中取出
-        if(userBank.getSubmit().equals(SUBMITTED)){
+        if (userBank.getSubmit().equals(SUBMITTED)) {
             List<Record> recordList = this.list(new QueryWrapper<Record>().eq("uesr_bank_id", ubid));
-            records=RECORD_CONVERTER.toListRecordVo(recordList);
-        }else{
+            records = RECORD_CONVERTER.toListRecordVo(recordList);
+        } else {
             records = CacheUtils.getTempRecord(ubid);
         }
 
@@ -264,6 +277,26 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
     }
 
+    /**
+     * 获取用户的刷题量和正确率
+     * @return
+     */
+    @Override
+    public GetUserAccuracyRateVo getUserRate(HttpServletRequest request) {
+        Integer uid = userService.getLoginUser(request).getUid();
+        List<Integer> ubids = userBankService.list(new QueryWrapper<UserBank>()
+                .eq("user_id", uid).eq("submit",SUBMITTED)).stream().map(UserBank::getId).collect(Collectors.toList());
+        //如果用户存在练习记录
+        if(ubids.size()>0){
+            //获取用户的全部刷题量和正确数量
+            List<Record> records= this.list(new QueryWrapper<Record>().in("user_bank_id", ubids));
+            long rightNum = records.stream().filter(record -> record.getCorrect().equals(CORRECT)).count();
+            return GetUserAccuracyRateVo.builder().rightNum(rightNum).questionAmount((long) records.size()).build();
+        }else{
+
+            return GetUserAccuracyRateVo.builder().questionAmount(0L).rightNum(0L).build();
+        }
+    }
 
 
     private boolean validCorrect(Integer value) {
