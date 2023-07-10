@@ -53,4 +53,9 @@ public interface IRecordService extends IService<Record> {
 
     Float  getPredictScore(HttpServletRequest request);
 
+    //推荐题库，难度，
+
+
+
+
 }

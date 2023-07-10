@@ -12,7 +12,7 @@ public class ScoringStrategyFactory {
         put(QuestionTypeEnum.SINGLE,new SingleScoringStrategy());
         put(QuestionTypeEnum.MULTIPLE,new MultipleScoringStrategy());
         put(QuestionTypeEnum.GAP_FILLING,new GapFillingScoringStrategy());
-        put(QuestionTypeEnum.TRUE_OR_FALSE,new GapFillingScoringStrategy());
+        put(QuestionTypeEnum.TRUE_OR_FALSE,new TrueOrFalseScoringStrategy());
         put(QuestionTypeEnum.SUBJECTIVE,new SubjectiveScoringStrategy());
     }};
 

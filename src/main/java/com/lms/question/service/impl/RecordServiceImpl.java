@@ -231,27 +231,30 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
 
         //开始记录分数
-        float finalScore = 0f;
+        float finalScore = 0f;  List<Record> records=null;
+        try{
+            //记录分数
+            for (RecordVo recordVo : recordVoList) {
+                Integer type = questionMap.get(recordVo.getQuestionId()).getType();
+                QuestionTypeEnum questionTypeEnum = Optional.ofNullable(QuestionTypeEnum.getEnumByValue(type))
+                        .orElse(QuestionTypeEnum.SINGLE);
+                //获取生成器
+                ScoringStrategy scoringStrategy = ScoringStrategyFactory.getScoringStrategy(questionTypeEnum);
+                float scoring = scoringStrategy.scoring(recordVo, questionMap);
+                finalScore += scoring;
+            }
+            //设置提交状态设置分数
+            userBank.setScore(finalScore);
+            userBank.setSubmit(SUBMITTED);
+            //保存分数 更新用户这次记录的状态为提交状态
+            userBankService.updateById(userBank);
 
-        //记录分数
-        for (RecordVo recordVo : recordVoList) {
-            Integer type = questionMap.get(recordVo.getQuestionId()).getType();
-            QuestionTypeEnum questionTypeEnum = Optional.ofNullable(QuestionTypeEnum.getEnumByValue(type))
-                    .orElse(QuestionTypeEnum.SINGLE);
-            //获取生成器
-            ScoringStrategy scoringStrategy = ScoringStrategyFactory.getScoringStrategy(questionTypeEnum);
-            float scoring = scoringStrategy.scoring(recordVo, questionMap);
-            finalScore += scoring;
+             records = RECORD_CONVERTER.toListRecord(recordVoList);
+            //删除缓冲
+            CacheUtils.removeTempRecord(userBankId);
+        }catch (Exception e){
+             throw new BusinessException(HttpCode.OPERATION_ERROR,"计算分数失败");
         }
-        //设置提交状态设置分数
-        userBank.setScore(finalScore);
-        userBank.setSubmit(SUBMITTED);
-        //保存分数 更新用户这次记录的状态为提交状态
-        userBankService.updateById(userBank);
-
-        List<Record> records = RECORD_CONVERTER.toListRecord(recordVoList);
-        //删除缓冲
-        CacheUtils.removeTempRecord(userBankId);
         //保存记录
         return this.saveBatch(records);
     }

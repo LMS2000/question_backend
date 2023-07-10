@@ -88,17 +88,17 @@ public class QuestionBankImpl extends ServiceImpl<QuestionBankMapper, QuestionBa
 
         //先获取题库下的已有的题目
         List<Integer> questionIdList = this.list(new QueryWrapper<QuestionBank>().eq("bid", bid)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
-        if (questionIdList.size() < 1) {
-
-            List<QuestionBank> addList = new ArrayList<>();
-            qids.stream().forEach(qid -> {
-                addList.add(QuestionBank.builder().bid(bid).qid(qid).build());
-            });
-            if (qids.size() > 0) {
-                return this.saveBatch(addList);
-            }
-
-        }
+//        if (questionIdList.size() < 1) {
+//
+//            List<QuestionBank> addList = new ArrayList<>();
+//            qids.stream().forEach(qid -> {
+//                addList.add(QuestionBank.builder().bid(bid).qid(qid).build());
+//            });
+//            if (qids.size() > 0) {
+//                return this.saveBatch(addList);
+//            }
+//
+//        }
         //获取角色原来没有的题目
         List<Integer> addList = qids.stream()
                 .filter(id -> !questionIdList.contains(id)).collect(Collectors.toList());
