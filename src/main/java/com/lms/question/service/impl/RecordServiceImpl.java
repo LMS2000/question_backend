@@ -155,6 +155,11 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     public GetQuestionsAndRecordVo getQuestionsByMode(Integer id, Integer type, HttpServletRequest request) {
 
         BusinessException.throwIfNot(MybatisUtils.existCheck(bankService, Map.of("id", id)));
+
+        List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", id)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
+
+        //如果没有题目的情况下
+        BusinessException.throwIf(qids.size()<1,HttpCode.OPERATION_ERROR,"该套试卷没有题目!");
         //查找用户的最近没提交练习记录
         Integer uid = userService.getLoginUser(request).getUid();
         UserBankVo userNotRecentlySubmitted = userBankService.getUserNotRecentlySubmitted(id, type, request);
@@ -166,10 +171,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
             userBankService.save(userBank);
             userNotRecentlySubmitted = USER_BANK_CONVERTER.toUserBankVo(userBank);
         }
-        List<Integer> qids = questionBankService.list(new QueryWrapper<QuestionBank>().eq("bid", id)).stream().map(QuestionBank::getQid).collect(Collectors.toList());
 
-        //如果没有题目的情况下
-        BusinessException.throwIf(qids.size()<1,HttpCode.OPERATION_ERROR,"该套试卷没有题目!");
 
         List<Question> questionList = null;
         //如果是考试状态没有答案
