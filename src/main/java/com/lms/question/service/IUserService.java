@@ -87,5 +87,5 @@ public interface IUserService extends IService<User> {
     Boolean resetPassword(ResetPasswordDto resetPasswordDto, Integer uid);
 //
 //
-//    String uploadAvatar(MultipartFile file, Integer uid);
+    String uploadAvatar(MultipartFile file, Integer uid);
 }

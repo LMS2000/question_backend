@@ -41,6 +41,13 @@
   </properties>
 
   <dependencies>
+    <!--        amazonawas包分离文件的存储源，本项目默认是本地，以后只需要修改yml关于oss的相关配置就好了-->
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-s3</artifactId>
+      <version>1.12.267</version>
+    </dependency>
+
     <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>easyexcel</artifactId>

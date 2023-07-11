@@ -1,11 +1,14 @@
 package com.lms.question.service.impl;
 
+import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.lms.contants.HttpCode;
+import com.lms.question.client.OssClient;
+import com.lms.question.config.OssProperties;
 import com.lms.question.constants.UserConstant;
 import com.lms.question.entity.dao.Bank;
 import com.lms.question.entity.dao.User;
@@ -23,14 +26,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static com.lms.question.constants.BankConstant.PUBLISHED;
 import static com.lms.question.constants.BankConstant.UNPUBLISHED;
+import static com.lms.question.constants.FileConstants.STATIC_REQUEST_PREFIX;
 import static com.lms.question.constants.UserConstant.*;
 import static com.lms.question.entity.factory.factory.UserFactory.USER_CONVERTER;
 
@@ -43,8 +50,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
 
 
+//    @Resource
+//    private BankMapper bankMapper;
+
+
     @Resource
-    private BankMapper bankMapper;
+    private OssClient ossClient;
+
+
+
+    @Resource
+    private OssProperties ossProperties;
+
+
     /**
      * 盐值，混淆密码
      */
@@ -244,6 +262,52 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         }
         String encodeNewPassword =  DigestUtils.md5DigestAsHex((SALT + newPassword).getBytes());
         return updateById(User.builder().uid(uid).password(encodeNewPassword).build());
+    }
+
+    @Override
+    public String uploadAvatar(MultipartFile file, Integer uid) {
+        //校验文件
+        validFile(file);
+
+        User user = this.getById(uid);
+        String bucketName = "bucket_user_" + uid;
+
+
+        if (!user.getAvatar().equals("#")) {
+            String[] split = user.getAvatar().split(bucketName);
+            ossClient.deleteObject(bucketName, split[1]);
+        }
+
+        //上传文件
+
+        String filePath;
+        try {
+            String randomPath =
+                    com.lms.question.utis.FileUtil.generatorFileName(file.getOriginalFilename() == null ? file.getName() : file.getOriginalFilename());
+            filePath = "avatar/" + randomPath;
+            ossClient.putObject(bucketName, filePath, file.getInputStream());
+
+        } catch (IOException e) {
+            throw new BusinessException(HttpCode.OPERATION_ERROR, "上传头像失败");
+        }
+
+        String fileUrl = com.lms.question.utis.FileUtil.getFileUrl(ossProperties.getEndpoint(), STATIC_REQUEST_PREFIX, bucketName, filePath);
+        this.updateById(User.builder().uid(uid).avatar(fileUrl).build());
+
+        return fileUrl;
+    }
+    private void validFile(MultipartFile multipartFile) {
+        // 文件大小
+        long fileSize = multipartFile.getSize();
+        // 文件后缀
+        String fileSuffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
+        final long ONE_M = 1024 * 1024 * 10L;
+        if (fileSize > ONE_M) {
+            throw new BusinessException(HttpCode.PARAMS_ERROR, "文件大小不能超过 10M");
+        }
+        if (!Arrays.asList("jpeg", "jpg", "svg", "png", "webp").contains(fileSuffix)) {
+            throw new BusinessException(HttpCode.PARAMS_ERROR, "文件类型错误");
+        }
     }
 
 

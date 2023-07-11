@@ -16,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -122,6 +123,19 @@ public class UserController {
         Integer uid = userService.getLoginUser(request).getUid();
         return  userService.resetPassword(resetPasswordDto, uid);
     }
+
+    /**
+     * 上传头像
+     *
+     * @param file
+     * @return 返回头像图片地址0
+     */
+    @PostMapping("/uploadAvatar")
+    public String uploadAvatar(@RequestBody MultipartFile file,HttpServletRequest request) {
+        Integer uid = userService.getLoginUser(request).getUid();
+        return userService.uploadAvatar(file, uid);
+    }
+
 
     /**
      * 分页条件获取用户列表

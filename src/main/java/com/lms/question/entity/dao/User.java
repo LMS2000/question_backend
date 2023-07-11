@@ -29,6 +29,8 @@ public class User {
 
     private  Integer enable;
 
+    private String avatar;
+
     @TableField("delete_flag")
     private Integer deleteFlag;
 
