@@ -4,9 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lms.question.entity.dao.Bank;
-import com.lms.question.entity.dao.User;
-import com.lms.question.entity.dao.UserBank;
+import com.lms.question.entity.dao.*;
 import com.lms.question.entity.dto.*;
 import com.lms.question.entity.vo.BankVo;
 import com.lms.question.entity.vo.LoginUserVo;
@@ -15,9 +13,7 @@ import com.lms.question.entity.vo.UserVo;
 import com.lms.question.exception.BusinessException;
 import com.lms.question.mapper.BankMapper;
 import com.lms.question.mapper.UserMapper;
-import com.lms.question.service.IBankService;
-import com.lms.question.service.IUserBankService;
-import com.lms.question.service.IUserService;
+import com.lms.question.service.*;
 import com.lms.question.utis.MybatisUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -46,6 +42,9 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IB
 
     @Resource
     private IUserBankService userBankService;
+
+    @Resource
+    private IQuestionBankService questionBankService;
     @Override
     public Boolean addBank(AddBankDto addBankDto) {
         String name = addBankDto.getName();
@@ -122,8 +121,14 @@ public class BankServiceImpl extends ServiceImpl<BankMapper, Bank> implements IB
         Page<Bank> pageBank = this.page(new Page<>(pageNum, pageSize), queryWrapper);
         List<Bank> records = pageBank.getRecords();
         List<BankVo> bankVos = BANK_CONVERTER.toListBankVo(records);
+        bankVos.forEach(bankVo -> {
+            long count = questionBankService.count(new QueryWrapper<QuestionBank>().eq("bid", bankVo.getId()));
+            bankVo.setAmount(count);
+        });
         Page<BankVo> result = new Page<>(pageNum, pageSize, pageBank.getTotal());
+
         result.setRecords(bankVos);
+
         return PublishBankVo.builder().userBankIds(bids).bankVoPage(result).build();
     }
 

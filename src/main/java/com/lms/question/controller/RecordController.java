@@ -139,12 +139,6 @@ public class RecordController {
 
 
 
-    //预测
-
-
-
-
-    //错误最多的题目
 
     /**
      * 获取用户错误次数前三的题目个错误次数
@@ -163,6 +157,20 @@ public class RecordController {
     public Float getPredictScore(HttpServletRequest request){
         return recordService.getPredictScore(request);
     }
+
+
+    @GetMapping("/get/recommend")
+    @ApiOperation("获取推荐题库")
+    public List<RecommendBankVo> getRecommendBanks(HttpServletRequest request){
+        return recordService.getRecommendBanks(request);
+    }
+
+    //用户创建的时候就有一个自己的错题的题库
+
+    //每次用户提交试卷的时候都会将写错的题目放到错题题库中
+
+    //用户可以做错题。错题做对也不会移除错题集
+
 
 
 }

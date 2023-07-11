@@ -26,6 +26,8 @@ public class BankVo implements Serializable {
     private String remark;
 
     private  Integer publish;
+
+    private Long amount;
     /*
       题目
      */

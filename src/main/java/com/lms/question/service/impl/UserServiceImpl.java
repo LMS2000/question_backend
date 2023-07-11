@@ -7,11 +7,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.lms.contants.HttpCode;
 import com.lms.question.constants.UserConstant;
+import com.lms.question.entity.dao.Bank;
 import com.lms.question.entity.dao.User;
 import com.lms.question.entity.dto.*;
+import com.lms.question.entity.vo.BankVo;
 import com.lms.question.entity.vo.LoginUserVo;
 import com.lms.question.entity.vo.UserVo;
 import com.lms.question.exception.BusinessException;
+import com.lms.question.mapper.BankMapper;
 import com.lms.question.mapper.UserMapper;
 import com.lms.question.service.IUserService;
 import com.lms.question.utis.MybatisUtils;
@@ -26,6 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
+import static com.lms.question.constants.BankConstant.PUBLISHED;
+import static com.lms.question.constants.BankConstant.UNPUBLISHED;
 import static com.lms.question.constants.UserConstant.*;
 import static com.lms.question.entity.factory.factory.UserFactory.USER_CONVERTER;
 
@@ -38,6 +43,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
 
 
+    @Resource
+    private BankMapper bankMapper;
     /**
      * 盐值，混淆密码
      */
@@ -59,6 +66,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         BeanUtils.copyProperties(addUserDto,user);
         user.setPassword(encryptPassword);
         this.save(user);
+
         return user.getUid();
     }
 
@@ -78,7 +86,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setUserRole(DEFAULT_ROLE);
         user.setNickname("user");
         user.setPassword(encryptPassword);
-       return   this.save(user);
+
+        return  this.save(user);
     }
 
     @Override

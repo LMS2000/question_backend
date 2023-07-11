@@ -1,6 +1,8 @@
 package com.lms.question.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lms.question.entity.dao.Bank;
+import com.lms.question.entity.dao.Question;
 import com.lms.question.entity.dao.Record;
 import com.lms.question.entity.dto.QueryRecordDto;
 import com.lms.question.entity.dto.SaveUserRecordDto;
@@ -53,7 +55,8 @@ public interface IRecordService extends IService<Record> {
 
     Float  getPredictScore(HttpServletRequest request);
 
-    //推荐题库，难度，
+    //推荐题库，推荐的方向：通过考试
+    List<RecommendBankVo> getRecommendBanks(HttpServletRequest request);
 
 
 

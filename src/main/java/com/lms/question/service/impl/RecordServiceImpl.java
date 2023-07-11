@@ -354,6 +354,44 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         return HttpApiUtil.getPredictData(predictServerProperties, uid);
     }
 
+    /**
+     * 获取刷题次数最多的三个套题，同时还必须是当前用户没有刷过的
+     * @param request
+     * @return
+     */
+    @Override
+    public List<RecommendBankVo> getRecommendBanks(HttpServletRequest request) {
+
+        Integer uid = userService.getLoginUser(request).getUid();
+
+        //系统用户做过最多次数，而且是用户没有做过的题库
+        List<UserBank> list = userBankService.list();
+
+        Map<Integer, Long> countMap = list.stream().limit(3).collect(Collectors.groupingBy(UserBank::getBankId, Collectors.counting()));
+
+        List<Integer> userBankIds = list.stream().filter(userBank -> userBank.getUserId().equals(uid)).map(UserBank::getBankId).collect(Collectors.toList());
+
+        List<Integer> bids=new ArrayList<>();
+
+        countMap.forEach((key,value)->{
+            if(userBankIds.contains(key)){
+                bids.add(key);
+            }
+        });
+        //封装推荐列表
+        List<RecommendBankVo> recommendBankVos=new ArrayList<>();
+        if(bids.size()>0){
+            List<Bank> banks = bankService.list(new QueryWrapper<Bank>().in("id", bids));
+            banks.forEach(bank->{
+                Long count = countMap.get(bank.getId());
+                recommendBankVos.add(RecommendBankVo.builder().amount(count)
+                        .bankVo(BANK_CONVERTER.toBankVo(bank)).build());
+            });
+            return recommendBankVos;
+        }
+      return null;
+    }
+
 
     private boolean validCorrect(Integer value) {
         return ObjectUtils.isNotEmpty(value) && (value.equals(0) || value.equals(1));
