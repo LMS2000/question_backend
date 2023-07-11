@@ -4,8 +4,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
-import com.lms.cloudpan.config.OssProperties;
-import com.lms.cloudpan.utis.FileUtil;
+
+import com.lms.question.config.OssProperties;
+import com.lms.question.utis.FileUtil;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -17,7 +18,7 @@ import java.io.InputStream;
 public class LocalClient implements OssClient{
 
     @Resource
-    private  OssProperties ossProperties;
+    private OssProperties ossProperties;
     @Override
     public void createBucket(String bucketName) {
         FileUtil.createDir(ossProperties.getRootPath(),bucketName);

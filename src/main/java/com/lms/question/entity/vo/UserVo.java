@@ -23,7 +23,7 @@ public class UserVo implements Serializable {
 
     private Integer uid;
 
-
+    private String avatar;
     private String username;
     private String email;
     private String nickname;

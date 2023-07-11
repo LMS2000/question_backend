@@ -31,6 +31,12 @@ swagger:
 predict-server:
   predict-url: http://localhost:5000/predict
 
+# 文件存储的路径
+oss:
+  #root-path: C:\Users\zdh\Desktop\test
+  root-path: E:\question_sys\question_file_home
+  #endpoint: http://119.91.143.140:20001
+  endpoint: http://localhost:9000/eqbs
 
 
 mybatis-plus:

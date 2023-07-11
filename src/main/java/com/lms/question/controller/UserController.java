@@ -177,6 +177,11 @@ public class UserController {
         return userService.updateUser(userDto);
     }
 
+    @PostMapping("/update/current")
+    public Boolean updateCurrentUser(@Validated @RequestBody  UpdateCurrentUserDto userDto,HttpServletRequest request){
+        return userService.updateCurrentUser(userDto,request);
+    }
+
 //    /**
 //     * 修改用户密码
 //     * @param password

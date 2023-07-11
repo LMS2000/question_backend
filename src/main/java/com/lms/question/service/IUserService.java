@@ -88,4 +88,6 @@ public interface IUserService extends IService<User> {
 //
 //
     String uploadAvatar(MultipartFile file, Integer uid);
+
+    Boolean  updateCurrentUser(UpdateCurrentUserDto userDto,HttpServletRequest request);
 }

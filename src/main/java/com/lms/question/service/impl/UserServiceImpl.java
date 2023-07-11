@@ -253,7 +253,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String encodeOldPassword =  DigestUtils.md5DigestAsHex((SALT + oldPassword).getBytes());
         //密码不对就报错
         BusinessException
-                .throwIfNot(MybatisUtils.existCheck(this, Map.of("user_id", uid,
+                .throwIfNot(MybatisUtils.existCheck(this, Map.of("uid", uid,
                         "password", encodeOldPassword)), HttpCode.PARAMS_ERROR);
 
         //如果新旧密码一致就直接返回
@@ -296,6 +296,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
         return fileUrl;
     }
+
+    /**
+     * 修改当前用户信息
+     * @param userDto
+     * @param request
+     * @return
+     */
+    @Override
+    public Boolean updateCurrentUser(UpdateCurrentUserDto userDto, HttpServletRequest request) {
+
+        Integer uid = this.getLoginUser(request).getUid();
+        return this.updateById(User.builder().uid(uid)
+                .nickname(userDto.getNickname()).email(userDto.getEmail()).build());
+    }
+
     private void validFile(MultipartFile multipartFile) {
         // 文件大小
         long fileSize = multipartFile.getSize();
