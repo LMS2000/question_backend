@@ -119,6 +119,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/resetPassword")
+    @ApiOperation("修改密码")
     public Boolean resetPassword(@RequestBody ResetPasswordDto resetPasswordDto,HttpServletRequest request) {
         Integer uid = userService.getLoginUser(request).getUid();
         return  userService.resetPassword(resetPasswordDto, uid);
@@ -131,6 +132,7 @@ public class UserController {
      * @return 返回头像图片地址0
      */
     @PostMapping("/uploadAvatar")
+    @ApiOperation("上次头像")
     public String uploadAvatar(@RequestBody MultipartFile file,HttpServletRequest request) {
         Integer uid = userService.getLoginUser(request).getUid();
         return userService.uploadAvatar(file, uid);
@@ -144,6 +146,7 @@ public class UserController {
      */
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @PostMapping("/page")
+    @ApiOperation("分页条件获取用户列表")
     public Page<UserVo> getUserPage( @RequestBody QueryUserPageDto userPageDto) {
         Page<UserVo> userVoPage = userService.pageUser(userPageDto);
         return userVoPage;
@@ -157,6 +160,7 @@ public class UserController {
      */
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     @PostMapping("/change/enable")
+    @ApiOperation("启用或者禁用用户")
     public Boolean changeUserEnable(@Validated @RequestBody ChangeUserEnableDto changeUserEnableDto) {
         Integer enable = changeUserEnableDto.getEnable();
         if (enable.equals(ENABLE)) {
@@ -173,11 +177,13 @@ public class UserController {
      */
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @ApiOperation("修改用户")
     public Boolean updateUser(@Validated @RequestBody UpdateUserDto userDto){
         return userService.updateUser(userDto);
     }
 
     @PostMapping("/update/current")
+    @ApiOperation("修改当前用户")
     public Boolean updateCurrentUser(@Validated @RequestBody  UpdateCurrentUserDto userDto,HttpServletRequest request){
         return userService.updateCurrentUser(userDto,request);
     }
