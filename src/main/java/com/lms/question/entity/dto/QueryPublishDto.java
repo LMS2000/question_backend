@@ -20,4 +20,5 @@ public class QueryPublishDto extends CustomPage implements Serializable {
     private String name;
 
 
+
 }

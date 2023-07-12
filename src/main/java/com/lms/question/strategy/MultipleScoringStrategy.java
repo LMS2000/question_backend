@@ -28,9 +28,9 @@ public class MultipleScoringStrategy implements ScoringStrategy {
 
         Question question = questionMap.get(recordVo.getQuestionId());
         Float questionScore = question.getQuestionScore();
-        String questionAnswer = question.getAnswer().trim();
+        String questionAnswer = question.getAnswer();
 
-        String userAnswer = recordVo.getUserAnswer().trim();
+        String userAnswer = recordVo.getUserAnswer();
 
         //转换json对象
 

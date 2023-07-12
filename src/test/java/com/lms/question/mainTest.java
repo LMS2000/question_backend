@@ -28,6 +28,7 @@ import com.lms.question.service.IBankService;
 import com.lms.question.service.IRecordService;
 import com.lms.question.service.IUserBankService;
 import com.lms.question.service.IUserService;
+import com.lms.question.task.QuestionRankTask;
 import com.lms.question.utis.CacheUtils;
 import com.lms.question.utis.HttpApiUtil;
 import com.lms.redis.RedisCache;
@@ -82,8 +83,12 @@ public class mainTest {
     @Resource
     private PredictServerProperties predictServerProperties;
 
+    @Resource
+    private QuestionRankTask questionRankTask;
+
     @Test
     public void test2() {
+        questionRankTask.taskForCacheQuestionRank();
 
 //        HttpApiUtil.getPredictData(predictServerProperties);
 
@@ -115,7 +120,7 @@ public class mainTest {
 //        });
 //
         //设置缓冲
-        CacheUtils.getUserQuestionAmount();
+//        CacheUtils.getUserQuestionAmount();
 
 
     }

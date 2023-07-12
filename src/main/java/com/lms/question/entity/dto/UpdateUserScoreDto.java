@@ -18,5 +18,6 @@ public class UpdateUserScoreDto implements Serializable {
     private Integer recordId;
 
     private Integer questionId;
-    private Integer score;
+    private Integer userBankId;
+    private Float score;
 }

@@ -81,16 +81,20 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
 
         //先查询属于ubid并且 ==correct
 
-        Map<Integer, Question> questionMap = questionService.list(new QueryWrapper<Question>()
-                        .like(StringUtils.isNotBlank(questionStem), "question_stem", questionStem)
-                        .eq(validType(type), "type", type)).stream()
-                .collect(Collectors.toMap(Question::getId, Function.identity()));
+        //如果题目的查询信息都为空就不再取查
+        Set<Integer> qids=null;
+        Map<Integer, Question> questionMap;
+            questionMap = questionService.list(new QueryWrapper<Question>()
+                            .like(StringUtils.isNotBlank(questionStem), "question_stem", questionStem)
+                            .eq(validType(type), "type", type)).stream()
+                    .collect(Collectors.toMap(Question::getId, Function.identity()));
+            qids = questionMap.keySet();
 
-        Set<Integer> qids = questionMap.keySet();
+
 
         List<Record> recordList = this.list(new QueryWrapper<Record>().eq(validCorrect(correct), "correct", correct)
                 .in(CollectionUtil.isNotEmpty(qids), "question_id", qids)
-                .eq("id", ubid));
+                .eq("user_bank_id", ubid));
 
         List<RecordVo> recordVos = RECORD_CONVERTER.toListRecordVo(recordList);
         recordVos.forEach(record -> {
@@ -131,14 +135,26 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     @Override
     public Boolean updateUserScore(UpdateUserScoreDto updateUserScoreDto) {
         Integer questionId = updateUserScoreDto.getQuestionId();
-        Integer score = updateUserScoreDto.getScore();
+        Float score = updateUserScoreDto.getScore();
         Integer recordId = updateUserScoreDto.getRecordId();
-
+        Integer userBankId = updateUserScoreDto.getUserBankId();
         //判断修改的得分是否大于题目的总分数
         Question question = questionService.getById(questionId);
+        //题目记录
+        RecordVo recordVo = this.getByRecordId(recordId);
+        UserBank userBank = userBankService.getById(userBankId);
+        BusinessException.throwIf(recordVo==null);
+        BusinessException.throwIf(userBank==null);
         BusinessException.throwIf(question == null);
         BusinessException.throwIf(score > question.getQuestionScore());
-        return this.update(new UpdateWrapper<Record>().set("score", score).eq("id", recordId));
+        boolean correct= score.equals(question.getQuestionScore());
+       this.update(new UpdateWrapper<Record>().set("score", score).set("correct",correct).eq("id", recordId));
+
+        //这里的newScore为修改后的分数与之前的分数的差值，可能为正为负
+        float  newScore=recordVo.getScore()-score;
+
+        return userBankService.updateById(UserBank.builder()
+                .id(userBankId).score(userBank.getScore()+newScore).build());
     }
 
 
@@ -334,11 +350,18 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
             List<Record> records = this.list(new QueryWrapper<Record>().in("user_bank_id", ubids)
                     .eq("correct", UNCORRECT));
             Map<Integer, Long> questionIdCountMap = records.stream()
-                    .limit(3)
                     .collect(Collectors.groupingBy(Record::getQuestionId, Collectors.counting()));
+            //排序
+            Map<Integer, Long> sortedMap = questionIdCountMap.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                    .limit(3)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+
             List<UserMistakeQuestionVo> resultList = new ArrayList<>();
             //添加用户错误前三的题目
-            questionIdCountMap.forEach((key, value) -> {
+            sortedMap.forEach((key, value) -> {
                 resultList.add(UserMistakeQuestionVo.builder()
                         .question(questionVoMap.get(key)).mistakeNum(value).build());
             });
@@ -367,13 +390,19 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
         //系统用户做过最多次数，而且是用户没有做过的题库
         List<UserBank> list = userBankService.list();
 
-        Map<Integer, Long> countMap = list.stream().limit(3).collect(Collectors.groupingBy(UserBank::getBankId, Collectors.counting()));
+        Map<Integer, Long> countMap = list.stream().collect(Collectors.groupingBy(UserBank::getBankId, Collectors.counting()));
 
+        //排序
+        Map<Integer, Long> sortedMap = countMap.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .limit(3)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
         List<Integer> userBankIds = list.stream().filter(userBank -> userBank.getUserId().equals(uid)).map(UserBank::getBankId).collect(Collectors.toList());
 
         List<Integer> bids=new ArrayList<>();
 
-        countMap.forEach((key,value)->{
+        sortedMap.forEach((key,value)->{
             if(userBankIds.contains(key)){
                 bids.add(key);
             }

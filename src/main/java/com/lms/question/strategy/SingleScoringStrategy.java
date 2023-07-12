@@ -22,9 +22,9 @@ public class SingleScoringStrategy implements ScoringStrategy{
 
         Question question = questionMap.get(recordVo.getQuestionId());
         Float questionScore = question.getQuestionScore();
-        String answer = question.getAnswer().trim();
+        String answer = question.getAnswer();
 
-        String userAnswer = recordVo.getUserAnswer().trim();
+        String userAnswer = recordVo.getUserAnswer();
         //将json选项转换成map
         Map<String, String> answerMap = OBJECT_MAPPER.readValue(answer, Map.class);
         AtomicReference<String> rightOption= new AtomicReference<>("");
