@@ -81,8 +81,8 @@ public class QuestionController {
     }
 
     @GetMapping("/export")
-    @ApiOperation("导入excel题目")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @ApiOperation("导出excel题目")
+//    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public void exportQuestoins(HttpServletResponse response){
         //获取easyexcel导出excel的二进制然后返回
          questionService.exportQuestions(response);

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lms.contants.HttpCode;
 import com.lms.question.annotation.AuthCheck;
 import com.lms.question.constants.UserConstant;
+import com.lms.question.entity.dao.User;
 import com.lms.question.entity.dto.*;
 import com.lms.question.entity.vo.LoginUserVo;
 import com.lms.question.entity.vo.UserVo;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.lms.question.constants.UserConstant.ENABLE;
+import static com.lms.question.entity.factory.factory.UserFactory.USER_CONVERTER;
 
 @RestController
 @RequestMapping("/user")
@@ -66,6 +68,13 @@ public class UserController {
             throw new BusinessException(HttpCode.PARAMS_ERROR);
         }
         return userService.userLogout(request);
+    }
+
+    @GetMapping("/get/{id}")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public UserVo getUserById(@PathVariable("id") Integer uid){
+        User byId = userService.getById(uid);
+       return USER_CONVERTER.toUserVo(byId);
     }
 
 

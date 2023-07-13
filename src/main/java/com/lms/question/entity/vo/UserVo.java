@@ -28,6 +28,8 @@ public class UserVo implements Serializable {
     private String email;
     private String nickname;
 
+    private String userRole;
+
 
     private  Integer enable;
 
